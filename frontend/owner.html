@@ -1,0 +1,343 @@
+<!-- =============================== -->
+<!-- OWNER DASHBOARD -->
+<!-- =============================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MoveMaster Owner Dashboard</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { margin:0; font-family: Arial,sans-serif; background:linear-gradient(135deg,#0aa2e6,#42d1f5); }
+header { background:#0aa2e6; color:#fff; padding:20px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+.container { display:flex; flex-wrap:wrap; padding:20px; gap:20px; }
+.card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1); flex:1 1 350px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.card:hover { transform: translateY(-5px); box-shadow:0 10px 25px rgba(0,0,0,0.2); }
+.card h3 { margin-top:0; color:#0aa2e6; }
+#map { height:300px; border-radius:10px; margin-top:10px; }
+.chart-container { height:250px; }
+input, button { padding:8px; margin:5px 0; }
+button { background:#0aa2e6; color:white; border:none; cursor:pointer; border-radius:6px; padding:8px 12px; }
+button:hover { opacity:0.9; }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+table, th, td { border:1px solid #ccc; }
+th, td { padding:8px; text-align:center; }
+.error-msg { color:red; margin-top:5px; font-weight:bold; }
+.success-msg { color:green; margin-top:5px; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛺MoveMaster Owner Dashboard🛺</h1>
+</header>
+
+<div class="container">
+
+  <!-- Driver Management -->
+  <div class="card">
+    <h3>Driver Management</h3>
+    <input type="text" id="driverName" placeholder="Driver Name">
+    <input type="text" id="driverContact" placeholder="Driver Contact">
+    <button type="button" onclick="addDriver()">Add Driver</button>
+    <p id="driverMsg" class="error-msg"></p>
+    <table id="driversTable">
+      <tr>
+        <th>Name</th>
+        <th>Contact</th>
+        <th>Rides Completed</th>
+        <th>Rating</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Users & Bookings -->
+  <div class="card">
+    <h3>User Ride Summary</h3>
+    <table id="usersTable">
+      <tr>
+        <th>Email</th>
+        <th>Total Rides</th>
+        <th>Completed</th>
+        <th>Cancelled</th>
+        <th>Action</th>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Active Rides Map -->
+  <div class="card" style="flex-basis:100%">
+    <h3>Active Rides Map</h3>
+    <div id="map"></div>
+    <p id="mapError" class="error-msg"></p>
+  </div>
+
+  <!-- Signup & Booking Analytics -->
+  <div class="card" style="flex-basis:100%">
+    <h3>Signup & Booking Analytics</h3>
+    <canvas id="signupChart" class="chart-container"></canvas>
+  </div>
+
+</div>
+
+<script>
+const API = "http://localhost:5000/api/owner";
+
+// ===============================
+// ADD DRIVER
+// ===============================
+async function addDriver() {
+  const name = document.getElementById("driverName").value.trim();
+  const contact = document.getElementById("driverContact").value.trim();
+  const msg = document.getElementById("driverMsg");
+  msg.className = "error-msg"; 
+  msg.innerText = "";
+
+  if (!name || !contact) {
+    msg.innerText = "Enter all fields!";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/drivers`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, contact })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      msg.innerText = data.message || "Server error!";
+      return;
+    }
+
+    msg.className = "success-msg";
+    msg.innerText = "Driver added successfully ✅";
+    document.getElementById("driverName").value = "";
+    document.getElementById("driverContact").value = "";
+    loadDrivers();
+  } catch (err) {
+    console.error(err);
+    msg.innerText = `Error connecting to server: ${err.message}`;
+  }
+}
+
+// ===============================
+// BLOCK/UNBLOCK DRIVER
+// ===============================
+function toggleDriverBlock(driverName) {
+  const blockedDrivers = JSON.parse(localStorage.getItem("blockedDrivers") || "[]");
+  const index = blockedDrivers.indexOf(driverName);
+  if(index > -1) blockedDrivers.splice(index,1);
+  else blockedDrivers.push(driverName);
+  localStorage.setItem("blockedDrivers", JSON.stringify(blockedDrivers));
+  loadDrivers();
+}
+
+// ===============================
+// BLOCK/UNBLOCK USER
+// ===============================
+function toggleUserBlock(email) {
+  const blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]");
+  const index = blockedUsers.indexOf(email);
+  if(index > -1) blockedUsers.splice(index,1);
+  else blockedUsers.push(email);
+  localStorage.setItem("blockedUsers", JSON.stringify(blockedUsers));
+  loadUsers();
+}
+
+// ===============================
+// LOAD DRIVERS
+// ===============================
+async function loadDrivers() {
+  const table = document.getElementById("driversTable");
+  table.innerHTML = `
+    <tr>
+      <th>Name</th>
+      <th>Contact</th>
+      <th>Rides Completed</th>
+      <th>Rating</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  `;
+
+  try {
+    const res = await fetch("http://localhost:5000/api/driver/all");
+    const drivers = await res.json();
+    const blockedDrivers = JSON.parse(localStorage.getItem("blockedDrivers") || "[]");
+
+    if (!drivers || drivers.length === 0) {
+      const row = table.insertRow();
+      row.insertCell(0).innerText = "No Drivers";
+      row.insertCell(1).innerText = "-";
+      row.insertCell(2).innerText = "0";
+      row.insertCell(3).innerText = "-";
+      row.insertCell(4).innerText = "-";
+      row.insertCell(5).innerText = "-";
+      return;
+    }
+
+    drivers.forEach(d => {
+      const row = table.insertRow();
+      row.insertCell(0).innerText = d.name;
+      row.insertCell(1).innerText = d.contact || "-";
+
+      const historyKey = "rideHistory_" + d.name;
+      const localRides = JSON.parse(localStorage.getItem(historyKey)) || [];
+      const completedRides = localRides.filter(r => r.status === "Completed").length;
+
+      row.insertCell(2).innerText = (d.rides || 0) + completedRides;
+      row.insertCell(3).innerText = d.rating || 5;
+
+      // Show Blocked status if driver is blocked
+      row.insertCell(4).innerText = blockedDrivers.includes(d.name) ? "Blocked" : (d.available ? "Available" : "Busy");
+
+      // Action button
+      const btn = document.createElement("button");
+      btn.innerText = blockedDrivers.includes(d.name) ? "Unblock" : "Block";
+      btn.onclick = () => toggleDriverBlock(d.name);
+      row.insertCell(5).appendChild(btn);
+    });
+  } catch (err) {
+    console.error("❌ Driver load error:", err);
+  }
+}
+
+// ===============================
+// LOAD USERS
+// ===============================
+async function loadUsers() {
+  const table = document.getElementById("usersTable");
+  table.innerHTML = `
+    <tr>
+      <th>Email</th>
+      <th>Total Rides</th>
+      <th>Completed</th>
+      <th>Cancelled</th>
+      <th>Action</th>
+    </tr>
+  `;
+
+  let users = [];
+  try {
+    const res = await fetch("http://localhost:5000/api/users");
+    if (!res.ok) throw new Error("API failed");
+    users = await res.json();
+  } catch (err) {
+    console.warn("API not available, using localStorage");
+    users = JSON.parse(localStorage.getItem("users") || "[]");
+  }
+
+  if (!users || users.length === 0) {
+    const row = table.insertRow();
+    row.insertCell(0).innerText = "No Users";
+    row.insertCell(1).innerText = "0";
+    row.insertCell(2).innerText = "0";
+    row.insertCell(3).innerText = "0";
+    row.insertCell(4).innerText = "-";
+    return;
+  }
+
+  const blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]");
+
+  users.forEach(u => {
+    const email = u.email || u;
+    const historyKey = "rideHistory_" + email;
+    const rides = JSON.parse(localStorage.getItem(historyKey)) || [];
+
+    let completed = 0, cancelled = 0;
+    rides.forEach(r => r.status === "Cancelled" ? cancelled++ : completed++);
+
+    const row = table.insertRow();
+    row.insertCell(0).innerText = email;
+    row.insertCell(1).innerText = rides.length;
+    row.insertCell(2).innerText = completed;
+    row.insertCell(3).innerText = cancelled;
+
+    const btn = document.createElement("button");
+    btn.innerText = blockedUsers.includes(email) ? "Unblock" : "Block";
+    btn.onclick = () => toggleUserBlock(email);
+    row.insertCell(4).appendChild(btn);
+  });
+}
+
+// ===============================
+// ACTIVE RIDES MAP
+// ===============================
+async function loadActiveRidesMap() {
+  const errMsg = document.getElementById("mapError");
+  errMsg.innerText = "";
+
+  try {
+    const res = await fetch("http://localhost:5000/api/driver/locations");
+    const drivers = await res.json();
+
+    const mapDiv = document.getElementById("map");
+    mapDiv.innerHTML = "";
+
+    const map = L.map("map").setView([19.076, 72.8777], 12);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
+
+    if (!drivers || drivers.length === 0) {
+      errMsg.innerText = "No active drivers on map";
+      return;
+    }
+
+    drivers.forEach(d => {
+      if (d.lat && d.lng) {
+        L.marker([d.lat, d.lng])
+          .addTo(map)
+          .bindPopup(`<b>${d.name}</b><br>Contact: ${d.contact}<br>Rides: ${(d.rides || 0)}`);
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    errMsg.innerText = "Unable to load driver locations";
+  }
+}
+
+// ===============================
+// LOAD STATS CHART
+// ===============================
+async function loadOwnerStats() {
+  try {
+    const res = await fetch(`${API}/stats`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    const labels = data.signups.map(s => s.date);
+    const values = data.signups.map(s => s.count);
+
+    if (window.signupChartInstance) window.signupChartInstance.destroy();
+
+    window.signupChartInstance = new Chart(
+      document.getElementById("signupChart").getContext("2d"),
+      {
+        type: "bar",
+        data: { labels, datasets: [{ label:"Signups", data: values, backgroundColor:"#0aa2e6" }] },
+        options: { responsive: true }
+      }
+    );
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ===============================
+// INIT & AUTO-REFRESH
+// ===============================
+loadDrivers();
+loadUsers();
+loadActiveRidesMap();
+loadOwnerStats();
+
+setInterval(loadDrivers, 5000);
+setInterval(loadUsers, 5000);
+
+</script>
+</body>
+</html>

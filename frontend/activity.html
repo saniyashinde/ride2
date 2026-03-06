@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Activity | MoveMaster</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+
+body{
+  font-family:'Baloo 2',cursive;
+  margin:0;
+  background:linear-gradient(135deg,#fdfbfb,#ebedee);
+  min-height:100vh;
+}
+
+/* NAVBAR */
+.navbar{
+  background:#fff;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 30px;
+  box-shadow:0 6px 20px rgba(0,0,0,0.15);
+}
+
+.nav-left{
+  font-size:22px;
+  color:#0aa2e6;
+  font-weight:600;
+}
+
+.nav-center a{
+  margin:0 15px;
+  text-decoration:none;
+  color:#333;
+  font-size:16px;
+}
+
+.nav-center a:hover{
+  color:#0aa2e6;
+}
+
+/* HEADER */
+.header{
+  text-align:center;
+  margin:35px 0 20px;
+}
+
+.header h2{
+  color:#0aa2e6;
+  font-size:28px;
+}
+
+.header p{
+  color:#666;
+}
+
+/* CANCEL MESSAGE */
+#cancelMsg{
+  display:none;
+  background:#ffe6e6;
+  color:#c62828;
+  padding:12px;
+  border-radius:14px;
+  text-align:center;
+  font-weight:bold;
+  margin:0 auto 25px;
+  width:90%;
+  max-width:600px;
+}
+
+/* STATS */
+.stats{
+  display:flex;
+  justify-content:center;
+  gap:25px;
+  flex-wrap:wrap;
+  margin-bottom:35px;
+}
+
+.stat{
+  background:#fff;
+  padding:22px;
+  border-radius:22px;
+  width:190px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+
+.stat h3{
+  color:#0aa2e6;
+  font-size:30px;
+  margin:0;
+}
+
+/* ACTIVITIES */
+.activities{
+  width:92%;
+  max-width:1100px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:22px;
+  padding-bottom:40px;
+}
+
+.card{
+  background:#fff;
+  padding:22px;
+  border-radius:22px;
+  box-shadow:0 12px 28px rgba(0,0,0,0.15);
+}
+
+/* CANCELLED CARD */
+.cancelled{
+  border:2px solid #f44336;
+  background:#fff0f0;
+}
+
+.cancelled .icon{
+  color:#f44336;
+  font-size:38px;
+}
+
+/* PROGRESS */
+.progress{
+  height:10px;
+  background:#eee;
+  border-radius:10px;
+  margin-top:12px;
+}
+
+.progress div{
+  height:100%;
+  background:#0aa2e6;
+  border-radius:10px;
+}
+
+/* EMPTY */
+.empty{
+  grid-column:1/-1;
+  text-align:center;
+  padding:40px;
+  font-size:18px;
+  color:#777;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-left">🛺 MoveMaster</div>
+  <div class="nav-center">
+    <a href="booking.html">🏠 Home</a>
+    <a href="activity.html">📊 Activity</a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <h2>Your Ride Activity</h2>
+  <p>Only your rides are shown here 💙</p>
+</div>
+
+<!-- ❌ CANCEL MESSAGE -->
+<p id="cancelMsg"></p>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <h3 id="totalRides">0</h3>
+    <p>Total Rides</p>
+  </div>
+  <div class="stat">
+    <h3 id="totalKM">0</h3>
+    <p>KM Travelled</p>
+  </div>
+  <div class="stat">
+    <h3 id="points">0</h3>
+    <p>Loyalty Points</p>
+  </div>
+</div>
+
+<!-- ACTIVITY LIST -->
+<div class="activities" id="activityList"></div>
+
+<script>
+// 🔔 SHOW CANCEL MESSAGE (ONCE)
+const cancelMsg = localStorage.getItem("lastCancelMessage");
+if (cancelMsg) {
+  const div = document.getElementById("cancelMsg");
+  div.innerText = cancelMsg;
+  div.style.display = "block";
+  localStorage.removeItem("lastCancelMessage");
+}
+
+/* USER */
+const email = localStorage.getItem("loggedInEmail");
+const activityList = document.getElementById("activityList");
+
+if (!email) {
+  activityList.innerHTML = `<div class="empty">Please login to see your activity</div>`;
+} else {
+
+  const historyKey = "rideHistory_" + email;
+  const rides = JSON.parse(localStorage.getItem(historyKey)) || [];
+
+  if (rides.length === 0) {
+    activityList.innerHTML = `<div class="empty">🛺 No rides yet</div>`;
+  } else {
+
+    let totalKM = 0;
+    let validRides = 0;
+
+    rides.forEach(ride => {
+
+      const card = document.createElement("div");
+
+      // ❌ CANCELLED RIDE
+      if (ride.status === "Cancelled") {
+        card.className = "card cancelled";
+        card.innerHTML = `
+          <div class="icon">❌</div>
+          <h3>Ride Cancelled</h3>
+          <p><strong>${ride.pickup} → ${ride.drop}</strong></p>
+          <p>Fare: ₹${ride.fare}</p>
+          <p>${ride.time}</p>
+        `;
+        activityList.appendChild(card);
+        return;
+      }
+
+      // ✅ NORMAL RIDE
+      const distance = (ride.fare / 25).toFixed(1);
+      totalKM += Number(distance);
+      validRides++;
+
+      card.className = "card";
+      card.innerHTML = `
+        <div class="icon">🛺</div>
+        <h3>Auto Ride</h3>
+        <p>${distance} KM • ₹${ride.fare}</p>
+        <p>${ride.time}</p>
+        <div class="progress">
+          <div style="width:${Math.min(distance * 8, 100)}%"></div>
+        </div>
+      `;
+      activityList.appendChild(card);
+    });
+
+    document.getElementById("totalRides").innerText = validRides;
+    document.getElementById("totalKM").innerText = totalKM.toFixed(1);
+    document.getElementById("points").innerText = validRides * 10;
+  }
+}
+</script>
+
+</body>
+</html>
+

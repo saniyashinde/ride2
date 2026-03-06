@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ride Confirmed | MoveMaster</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+
+/* ===== GLOBAL ===== */
+* { box-sizing: border-box; font-family:'Baloo 2', cursive; margin:0; padding:0; }
+body {
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  padding-top:70px; /* space for navbar */
+  background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+  overflow:hidden;
+}
+
+/* ===== NAVBAR ===== */
+.navbar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:60px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 30px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.15);
+  z-index:999;
+}
+
+.nav-left{
+  font-size:20px;
+  font-weight:600;
+  color:#0aa2e6;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.nav-center{
+  display:flex;
+  gap:25px;
+}
+
+.nav-center a{
+  text-decoration:none;
+  color:#333;
+  font-size:15px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.nav-center a:hover{ color:#0aa2e6; }
+
+.profile{ position:relative; }
+
+.profile-btn{
+  cursor:pointer;
+  background:#0aa2e6;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.dropdown{
+  position:absolute;
+  right:0;
+  top:48px;
+  background:#fff;
+  width:160px;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  display:none;
+}
+
+.dropdown a{
+  display:block;
+  padding:12px;
+  text-decoration:none;
+  color:#333;
+  font-size:14px;
+}
+
+.dropdown a:hover{ background:#f2f2f2; }
+
+/* ===== CARD ===== */
+.card {
+  background: rgba(255,255,255,0.95);
+  padding: 40px 30px;
+  border-radius: 25px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  text-align: center;
+  position: relative;
+  width: 350px;
+}
+
+/* Heading */
+h2 {
+  color: #4db8ff;
+  font-size: 28px;
+  margin-bottom: 15px;
+  animation: pop 0.5s ease;
+}
+
+/* Pop animation */
+@keyframes pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Message */
+p {
+  font-size: 18px;
+  color: #007acc;
+  margin-bottom: 20px;
+  animation: fadeIn 1s ease forwards;
+  opacity: 0;
+}
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* Confetti */
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: fall 3s linear forwards;
+}
+@keyframes fall {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(300px) rotate(360deg); opacity: 0; }
+}
+
+/* Auto icon */
+#autoIcon {
+  font-size: 50px;
+  position: relative;
+  animation: drive 2s ease forwards;
+}
+@keyframes drive {
+  0% { transform: translateX(100px); }
+  100% { transform: translateX(0); }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<div class="navbar">
+  <div class="nav-left">🛺 MoveMaster</div>
+
+  <div class="nav-center">
+    <a href="home.html">🏠 Home</a>
+    <a href="services.html">🛺 Services</a>
+    <a href="activity.html">📊 Activity</a>
+    <a href="help.html">🆘 Help</a>
+  </div>
+
+  <div class="profile">
+   <div class="profile-btn" onclick="toggleMenu()">
+      👤 ⌄
+    </div> <div class="dropdown" id="menu">
+      <a href="profile.html">👤 My Profile</a>
+      <a href="ridehistory.html">📜 Ride History</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>✅ Your Ride is Confirmed!</h2>
+  <p>Finding best offers for you... 🎁</p>
+  <div id="autoIcon">🛺</div>
+</div>
+
+<script>
+// NAV USER NAME FROM LOGIN EMAIL
+
+
+// ===== NAVBAR MENU =====
+function toggleMenu(){
+  const menu=document.getElementById("menu");
+  menu.style.display=menu.style.display==="block"?"none":"block";
+}
+function logout(){
+  localStorage.clear();
+  alert("Logged out successfully");
+  window.location.href="login.html";
+}
+
+// ===== CONFETTI & REDIRECT =====
+function createConfetti() {
+  for(let i=0; i<30; i++){
+    const c = document.createElement('div');
+    c.classList.add('confetti');
+    c.style.left = Math.random() * window.innerWidth + 'px';
+    c.style.background = `hsl(${Math.random()*360}, 70%, 60%)`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3000);
+  }
+}
+
+// Trigger confetti
+createConfetti();
+
+// Redirect after 3 sec to next page (tracking or offer page)
+setTimeout(()=>{ window.location.href = "autotrac.html"; }, 3000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MoveMaster | Signup/Login</title>
+
+<!-- Google Identity Script -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<style>
+body {
+  margin:0;
+  font-family:'Baloo 2', cursive;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  background:linear-gradient(135deg,#0aa2e6,#42d1f5);
+}
+
+.box {
+  background:#fff;
+  padding:30px;
+  border-radius:15px;
+  width:350px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+h2 { color:#0aa2e6; margin-bottom:20px; }
+
+input {
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+button {
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.create-btn { background:#0aa2e6; color:#fff; }
+.continue-btn { background:#42d1f5; color:#fff; }
+
+.msg { font-size:14px; min-height:18px; margin-top:5px; }
+.error { color:red; }
+.valid { color:green; }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>🛺 MoveMaster 🛺</h2>
+
+  <button class="create-btn" onclick="showCreate()">➕ Create New Account</button>
+  <button class="continue-btn" onclick="showContinue()">🔓 Already Have Account</button>
+
+  <!-- ✅ GOOGLE LOGIN -->
+  <div id="g_id_onload"
+       data-client_id="943781661668-0qlkl29kirfdnqhj1l9iersn88etoqam.apps.googleusercontent.com"
+       data-callback="onGoogleLoginSuccess">
+  </div>
+
+  <div class="g_id_signin"></div>
+
+  <div id="formArea" style="margin-top:20px;"></div>
+  <p id="msg" class="msg"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+<script>
+const formArea = document.getElementById("formArea");
+const msg = document.getElementById("msg");
+
+/* ---------- CREATE ACCOUNT ---------- */
+function showCreate() {
+  msg.innerText = "";
+  formArea.innerHTML = `
+    <input id="email" placeholder="Gmail address">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="createAccount()">Create Account</button>
+  `;
+}
+
+async function createAccount() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!email.endsWith("@gmail.com")) {
+    msg.innerText = "❌ Enter valid Gmail";
+    msg.className = "msg error";
+    return;
+  }
+
+  if (password.length < 8) {
+    msg.innerText = "❌ Password must be 8+ characters";
+    msg.className = "msg error";
+    return;
+  }
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",   // ⭐ SESSION ENABLED
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("userId", data.user._id);  // required for ride history
+      localStorage.setItem("loggedInEmail", data.user.email);
+      msg.innerText = "✅ Account created!";
+      msg.className = "msg valid";
+      setTimeout(() => window.location.href = "booking.html", 1000);
+    } else {
+      msg.innerText = `❌ ${data.msg}`;
+      msg.className = "msg error";
+    }
+  } catch (err) {
+    msg.innerText = "❌ Server error";
+    msg.className = "msg error";
+  }
+}
+
+/* ---------- NORMAL LOGIN ---------- */
+function showContinue() {
+  msg.innerText = "";
+  formArea.innerHTML = `
+    <input id="email" placeholder="Enter your email">
+    <button onclick="continueLogin()">Continue</button>
+  `;
+}
+
+async function continueLogin() {
+  const email = document.getElementById("email").value.trim();
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",   // ⭐ SESSION ENABLED
+      body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("userId", data.user._id);  // important for ride history
+      localStorage.setItem("loggedInEmail", data.user.email);
+      msg.innerText = "✅ Login successful!";
+      msg.className = "msg valid";
+      setTimeout(() => window.location.href = "booking.html", 1000);
+    } else {
+      msg.innerText = `❌ ${data.msg}`;
+      msg.className = "msg error";
+    }
+  } catch (err) {
+    msg.innerText = "❌ Server error";
+    msg.className = "msg error";
+  }
+}
+
+/* ---------- GOOGLE LOGIN ---------- */
+function onGoogleLoginSuccess(response) {
+  const data = jwt_decode(response.credential);
+
+  const userData = {
+    name: data.name,
+    email: data.email,
+    image: data.picture
+  };
+
+  // Save Google login user in localStorage
+  localStorage.setItem("loggedInUser", JSON.stringify(userData));
+  localStorage.setItem("loggedInEmail", data.email);
+
+  // Optional: send Google user to backend
+  fetch("http://127.0.0.1:5000/api/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",   // ⭐ SESSION ENABLED
+    body: JSON.stringify({ email: data.email, password: "google_oauth", name: data.name, image: data.picture })
+  }).catch(err => console.log("Google user already exists or error"));
+
+  window.location.href = "booking.html";
+}
+</script>
+
+
+</body>
+</html>

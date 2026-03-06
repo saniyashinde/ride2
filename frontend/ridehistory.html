@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ride History | MoveMaster</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+
+  body {
+    font-family: 'Baloo 2', cursive;
+    margin: 0;
+    background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+    min-height: 100vh;
+    padding-top: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* NAVBAR */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    z-index: 999;
+  }
+  .nav-left { font-size: 20px; font-weight: 600; color: #0aa2e6; }
+  .nav-center { display: flex; gap: 25px; }
+  .nav-center a { text-decoration: none; color: #333; font-size: 15px; }
+  .nav-center a:hover { color: #0aa2e6; }
+
+  /* CARD */
+  .card {
+    background: #fff;
+    width: 90%;
+    max-width: 700px;
+    margin-top: 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    padding: 20px 25px;
+  }
+
+  h2 { color: #0aa2e6; text-align: center; margin-bottom: 15px; }
+
+  .ride {
+    background: #f0f8ff;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.3s;
+  }
+  .ride:hover { transform: scale(1.02); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+
+  .ride-info { display: flex; flex-direction: column; }
+  .ride-info span { font-size: 14px; color: #555; }
+
+  .status {
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 13px;
+  }
+  .Completed { background: #4CAF50; }
+  .OnTheWay { background: #ff9800; }
+  .Cancelled { background: #f44336; }
+
+  button {
+    padding: 10px 15px;
+    border-radius: 12px;
+    border: none;
+    background: #0aa2e6;
+    color: #fff;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  button:hover { background: #088ac7; }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-left">🛺 MoveMaster</div>
+  <div class="nav-center">
+    <a href="index.html">🏠 Home</a>
+    <a href="services.html">🛺 Services</a>
+    <a href="activity.html">📊 Activity</a>
+    <a href="help.html">🆘 Help</a>
+  </div>
+</div>
+
+<!-- CARD -->
+<div class="card">
+  <h2>🛺 Your Ride History</h2>
+  <div id="rideHistory"></div>
+  <button onclick="clearHistory()">Clear History 🗑️</button>
+</div>
+
+<script>
+function renderRides() {
+  const rideHistoryDiv = document.getElementById("rideHistory");
+  rideHistoryDiv.innerHTML = "";
+
+  /* 🔐 GET LOGGED IN USER */
+  const userEmail = localStorage.getItem("loggedInEmail");
+
+  if (!userEmail) {
+    rideHistoryDiv.innerHTML =
+      "<p style='text-align:center;color:red;'>Please login to view your ride history.</p>";
+    return;
+  }
+
+  /* 🔑 USER-SPECIFIC KEY */
+  const historyKey = "rideHistory_" + userEmail;
+let history = JSON.parse(localStorage.getItem(historyKey)) || [];
+
+
+// show completed rides
+
+  let rides = JSON.parse(localStorage.getItem(historyKey)) || [];
+
+  if (rides.length === 0) {
+    rideHistoryDiv.innerHTML =
+      "<p style='text-align:center;color:#555;'>No rides yet.</p>";
+    return;
+  }
+
+  rides.forEach(ride => {
+    const div = document.createElement("div");
+    div.className = "ride";
+    div.innerHTML = `
+      <div class="ride-info">
+        <strong>${ride.pickup} → ${ride.drop}</strong>
+        <span>Fare: ₹${ride.fare}</span>
+        <span>Time: ${ride.time}</span>
+      </div>
+      <div class="status ${ride.status.replace(/\s/g,'')}">${ride.status}</div>
+    `;
+    rideHistoryDiv.appendChild(div);
+  });
+}
+
+function clearHistory() {
+  const userEmail = localStorage.getItem("loggedInEmail");
+  if (!userEmail) return;
+
+  const historyKey = "rideHistory_" + userEmail;
+
+  if (confirm("Clear your ride history?")) {
+    localStorage.removeItem(historyKey);
+    renderRides();
+  }
+}
+
+renderRides();
+</script>
+
+
+</body>
+</html>

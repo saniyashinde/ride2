@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ride Tracking</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDw8k3ZAvjZ-5zRhs6RlJI8fFZkCKvUclw"></script>
+</head>
+<body>
+  <h2>Live Ride Tracking</h2>
+  <div id="map" style="height: 500px; width: 100%;"></div>
+  <button onclick="endRide()">End Ride</button>
+
+  <script>
+    const socket = io("http://localhost:8080"); // <-- Make sure server runs on 8080
+
+    const rideId = localStorage.getItem("rideId");
+    if (!rideId) {
+      alert("Ride not found");
+    }
+
+    socket.emit("joinRide", rideId);
+
+    let map, marker;
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 16,
+        center: { lat: 19.0760, lng: 72.8777 } // Mumbai by default
+      });
+
+      marker = new google.maps.Marker({
+        map,
+        title: "Auto Rickshaw"
+      });
+    }
+
+    socket.on("liveLocation", (data) => {
+      const pos = { lat: data.lat, lng: data.lng };
+      marker.setPosition(pos);
+      map.setCenter(pos);
+    });
+
+    initMap();
+
+    function endRide() {
+      localStorage.removeItem("rideId");
+      window.location.href = "offer.html";
+    }
+  </script>
+</body>
+</html>

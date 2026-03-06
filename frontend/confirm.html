@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Confirm Your Ride | MoveMaster</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+
+/* ===== GLOBAL ===== */
+* { box-sizing: border-box; font-family:"Baloo 2", cursive; margin:0; padding:0; }
+body {
+  background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+  min-height:100vh;
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding-top:70px; /* space for navbar */
+}
+
+/* ===== NAVBAR ===== */
+.navbar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:60px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 30px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.15);
+  z-index:999;
+}
+
+.nav-left{
+  font-size:20px;
+  font-weight:600;
+  color:#0aa2e6;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.nav-center{
+  display:flex;
+  gap:25px;
+}
+
+.nav-center a{
+  text-decoration:none;
+  color:#333;
+  font-size:15px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.nav-center a:hover{ color:#0aa2e6; }
+
+.profile{ position:relative; }
+
+.profile-btn{
+  cursor:pointer;
+  background:#0aa2e6;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.dropdown{
+  position:absolute;
+  right:0;
+  top:48px;
+  background:#fff;
+  width:160px;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  display:none;
+}
+
+.dropdown a{
+  display:block;
+  padding:12px;
+  text-decoration:none;
+  color:#333;
+  font-size:14px;
+}
+
+.dropdown a:hover{ background:#f2f2f2; }
+
+/* ===== CONFIRM RIDE BOX ===== */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  animation: float 10s infinite;
+}
+@keyframes float {
+  0% { transform: translateY(0) scale(1); opacity: 0.5; }
+  50% { transform: translateY(-1000px) scale(1.5); opacity: 0.8; }
+  100% { transform: translateY(0) scale(1); opacity: 0.5; }
+}
+
+.box {
+  background: rgba(255,255,255,0.95);
+  padding: 30px;
+  width: 360px;
+  text-align: center;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 10;
+}
+
+h3 { color: #4db8ff; margin-bottom: 15px; }
+
+p#rideInfo {
+  background: #e0f7ff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #007acc;
+}
+
+#otpMsg {
+  font-weight:bold;
+  font-size:16px;
+  color:#007acc;
+  margin-bottom:20px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  background: #4db8ff;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+button:hover { background: #3399ff; }
+.cancel-btn { background: #ff6666; }
+.cancel-btn:hover { background: #ff3333; }
+
+#msg {
+  margin-top: 15px;
+  font-weight: bold;
+  font-size: 18px;
+  color: #ff6600;
+  text-align: center;
+  animation: pop 0.5s ease;
+}
+@keyframes pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+#autoIcon {
+  font-size: 40px;
+  position: absolute;
+  top: 10px;
+  right: -50px;
+  animation: drive 5s linear forwards;
+  display: none;
+}
+@keyframes drive {
+  from {
+    right: -50px;
+  }
+  to {
+    right: 100%;
+  }
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #ffcc00;
+  top: 0;
+  opacity: 0.8;
+  border-radius: 50%;
+  animation: fall 3s linear forwards;
+}
+@keyframes fall {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(300px) rotate(360deg); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<div class="navbar">
+  <div class="nav-left">🛺 MoveMaster</div>
+
+  <div class="nav-center">
+    <a href="home.html">🏠 Home</a>
+    <a href="services.html">🛺 Services</a>
+    <a href="activity.html">📊 Activity</a>
+    <a href="help.html">🆘 Help</a>
+  </div>
+
+  <div class="profile">
+   <div class="profile-btn" onclick="toggleMenu()">
+      👤  ⌄
+    </div>
+    <div class="dropdown" id="menu">
+      <a href="profile.html">👤 My Profile</a>
+      <a href="ridehistory.html">📜 Ride History</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- Floating bubbles -->
+<div class="bubble" style="width:50px;height:50px;left:10%;animation-delay:0s;"></div>
+<div class="bubble" style="width:80px;height:80px;left:30%;animation-delay:2s;"></div>
+<div class="bubble" style="width:30px;height:30px;left:50%;animation-delay:4s;"></div>
+<div class="bubble" style="width:60px;height:60px;left:70%;animation-delay:1s;"></div>
+<div class="bubble" style="width:40px;height:40px;left:90%;animation-delay:3s;"></div>
+
+<!-- Confirm Ride Box -->
+<div class="box">
+  <h3>🛺Confirm Your Ride</h3>
+
+  <!-- Ride info -->
+  <p id="rideInfo"></p>
+
+  <!-- OTP from previous page -->
+  <p id="otpMsg"></p>
+
+  <button onclick="confirmRide()">Confirm Ride ✅</button>
+  <p id="msg"></p>
+  <button class="cancel-btn" onclick="cancelRide()">Cancel Ride ❌</button>
+
+  <div id="autoIcon">🛺</div>
+</div>
+
+<script>
+  // NAV USER NAME FROM LOGIN EMAIL
+
+
+// ===== NAVBAR MENU =====
+function toggleMenu(){
+  const menu=document.getElementById("menu");
+  menu.style.display=menu.style.display==="block"?"none":"block";
+}
+function logout(){
+  localStorage.clear();
+  alert("Logged out successfully");
+  window.location.href="login.html";
+}
+
+// ===== RIDE INFO =====
+window.onload = function() {
+  const rideInfo = document.getElementById('rideInfo');
+  const pickup = localStorage.getItem('pickup') || 'Thane';
+  const drop = localStorage.getItem('drop') || 'Mulund';
+  const fare = localStorage.getItem('fare') || '50';
+  rideInfo.innerHTML = `Pickup: ${pickup}<br>Drop: ${drop}<br>Fare: ₹${fare}`;
+
+  const otp = localStorage.getItem('rideOTP');
+  const otpMsg = document.getElementById('otpMsg');
+  if(otp) otpMsg.innerHTML = `Your OTP is: <strong>${otp}</strong>`;
+  else otpMsg.innerHTML = "OTP not found! Please go back and generate OTP.";
+};
+
+// ===== CONFIRM RIDE =====
+function createConfetti() {
+  for(let i=0; i<30; i++){
+    const c = document.createElement('div');
+    c.classList.add('confetti');
+    c.style.left = Math.random() * 350 + 'px';
+    c.style.background = `hsl(${Math.random()*360}, 70%, 60%)`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3000);
+  }
+}
+function confirmRide() {
+  const email = localStorage.getItem("loggedInEmail");
+  if (!email) return;
+
+  const historyKey = "rideHistory_" + email;
+  const rides = JSON.parse(localStorage.getItem(historyKey)) || [];
+
+  rides.unshift({
+    pickup: localStorage.getItem("pickup"),
+    drop: localStorage.getItem("drop"),
+    fare: localStorage.getItem("fare"),
+    status: "OnTheWay",
+    time: new Date().toLocaleString()
+  });
+
+  localStorage.setItem(historyKey, JSON.stringify(rides));
+
+  localStorage.removeItem("rideOTP");
+
+  window.location.href = "success.html";
+}
+
+// ===== CANCEL RIDE =====
+function cancelRide() {
+  if (!confirm("Cancel this ride?")) return;
+
+  const email = localStorage.getItem("loggedInEmail");
+  if (!email) return;
+
+  const historyKey = "rideHistory_" + email;
+  const rides = JSON.parse(localStorage.getItem(historyKey)) || [];
+
+  rides.unshift({
+    pickup: localStorage.getItem("pickup"),
+    drop: localStorage.getItem("drop"),
+    fare: localStorage.getItem("fare"),
+    status: "Cancelled",
+    time: new Date().toLocaleString()
+  });
+
+  localStorage.setItem(historyKey, JSON.stringify(rides));
+
+  localStorage.setItem("lastCancelMessage", "❌ Your ride was cancelled");
+
+  localStorage.removeItem("pickup");
+  localStorage.removeItem("drop");
+  localStorage.removeItem("fare");
+
+  window.location.href = "ridehistory.html";
+}
+
+
+</script>
+
+</body>
+</html>

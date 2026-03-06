@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Home | MoveMaster</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600&display=swap');
+
+*{
+  box-sizing:border-box;
+  font-family:'Baloo 2', cursive;
+}
+
+/* ===== BODY ===== */
+body{
+  margin:0;
+  background:linear-gradient(135deg,#fdfbfb,#ebedee);
+  min-height:100vh;
+}
+
+/* ===== NAVBAR ===== */
+.navbar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:60px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 30px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.15);
+  z-index:999;
+}
+
+.nav-left{
+  font-size:20px;
+  font-weight:600;
+  color:#0aa2e6;
+}
+
+.nav-center{
+  display:flex;
+  gap:25px;
+}
+
+.nav-center a{
+  text-decoration:none;
+  color:#333;
+  font-size:15px;
+}
+
+.nav-center a:hover{
+  color:#0aa2e6;
+}
+
+/* PROFILE */
+.profile{
+  position:relative;
+}
+
+.profile-btn{
+  cursor:pointer;
+  background:#0aa2e6;
+  color:#fff;
+  padding:8px 14px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.dropdown{
+  position:absolute;
+  right:0;
+  top:48px;
+  background:#fff;
+  width:160px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  display:none;
+}
+
+.dropdown a{
+  display:block;
+  padding:12px;
+  text-decoration:none;
+  color:#333;
+}
+
+.dropdown a:hover{
+  background:#f2f2f2;
+}
+
+/* ===== HERO ===== */
+.hero{
+  margin-top:80px;
+  padding:50px 30px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
+
+.hero-text{
+  max-width:500px;
+}
+
+.hero-text h1{
+  font-size:42px;
+  color:#0aa2e6;
+  margin-bottom:10px;
+}
+
+.hero-text p{
+  font-size:16px;
+  color:#555;
+  margin-bottom:20px;
+}
+
+.hero-text button{
+  padding:14px 26px;
+  background:#0aa2e6;
+  border:none;
+  border-radius:25px;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.hero-text button:hover{
+  background:#088ac7;
+}
+
+.hero-img{
+  font-size:140px;
+  animation:move 3s infinite alternate ease-in-out;
+}
+
+@keyframes move{
+  from{transform:translateX(0);}
+  to{transform:translateX(30px);}
+}
+
+/* ===== QUICK ACTIONS ===== */
+.quick{
+  padding:40px 30px;
+  text-align:center;
+}
+
+.quick h2{
+  color:#333;
+  margin-bottom:20px;
+}
+
+.quick-boxes{
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.quick-box{
+  background:#fff;
+  width:220px;
+  padding:20px;
+  border-radius:18px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.quick-box:hover{
+  transform:translateY(-10px);
+}
+
+.quick-box span{
+  font-size:40px;
+}
+
+.quick-box p{
+  margin:10px 0 0;
+  font-weight:600;
+}
+
+/* ===== STATS ===== */
+.stats{
+  background:#0aa2e6;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  gap:40px;
+  padding:30px;
+  flex-wrap:wrap;
+}
+
+.stat{
+  text-align:center;
+}
+
+.stat h3{
+  font-size:28px;
+  margin:0;
+}
+
+/* ===== CTA ===== */
+.cta{
+  text-align:center;
+  padding:50px 20px;
+}
+
+.cta h2{
+  color:#0aa2e6;
+  margin-bottom:10px;
+}
+
+.cta button{
+  padding:14px 30px;
+  background:#0aa2e6;
+  border:none;
+  border-radius:30px;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.cta button:hover{
+  background:#088ac7;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+  .hero{
+    flex-direction:column;
+    text-align:center;
+  }
+  .hero-img{
+    margin-top:20px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<div class="navbar">
+  <div class="nav-left">🛺 MoveMaster</div>
+
+  <div class="nav-center">
+    <a href="home.html">🏠 Home</a>
+    <a href="booking.html">🛺 Book</a>
+    <a href="activity.html">📊 Activity</a>
+    <a href="help.html">🆘 Help</a>
+  </div>
+
+  <div class="profile">
+    <div class="profile-btn" onclick="toggleMenu()">
+      👤 ⌄
+    </div>
+
+    <div class="dropdown" id="menu">
+      <a href="profile.html">👤 My Profile</a>
+      <a href="ridehistory.html">📜 Ride History</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-text">
+    <h1>Ride Smart. Ride Fast.</h1>
+    <p>Your everyday auto-rickshaw partner for quick, safe and affordable city rides.</p>
+    <button onclick="window.location.href='booking.html'">Book a Ride 🛺</button>
+  </div>
+  <div class="hero-img">🛺</div>
+</div>
+
+<!-- ===== QUICK ACTIONS ===== -->
+<div class="quick">
+  <h2>Quick Actions</h2>
+  <div class="quick-boxes">
+    <div class="quick-box" onclick="location.href='booking.html'">
+      <span>🛺</span>
+      <p>Book Auto</p>
+    </div>
+    <div class="quick-box" onclick="location.href='activity.html'">
+      <span>📊</span>
+      <p>My Activity</p>
+    </div>
+    <div class="quick-box" onclick="location.href='profile.html'">
+      <span>👤</span>
+      <p>My Profile</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STATS ===== -->
+<div class="stats">
+  <div class="stat">
+    <h3>10K+</h3>
+    <p>Happy Riders</p>
+  </div>
+  <div class="stat">
+    <h3>50K+</h3>
+    <p>Rides Completed</p>
+  </div>
+  <div class="stat">
+    <h3>4.8 ⭐</h3>
+    <p>User Rating</p>
+  </div>
+</div>
+
+<!-- ===== CTA ===== -->
+<div class="cta">
+  <h2>Ready to Ride?</h2>
+  <p>Book your auto in just a few seconds</p>
+  <button onclick="window.location.href='booking.html'">Start Riding</button>
+</div>
+
+<script>
+// USER NAME FROM LOGIN EMAIL
+
+// DROPDOWN
+function toggleMenu(){
+  const m=document.getElementById("menu");
+  m.style.display=m.style.display==="block"?"none":"block";
+}
+
+// LOGOUT
+function logout(){
+  localStorage.clear();
+  location.href="login.html";
+}
+</script>
+
+</body>
+</html>

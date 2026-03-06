@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Owner Login | MoveMaster</title>
+<style>
+body {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  font-family:sans-serif;
+  background:linear-gradient(135deg,#0aa2e6,#42d1f5);
+}
+.login-box {
+  background:#fff;
+  padding:30px;
+  border-radius:15px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+}
+input, button {
+  width:80%;
+  padding:10px;
+  margin:10px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px;
+}
+button {
+  background:#0aa2e6;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+button:hover {
+  opacity:0.9;
+}
+.msg {
+  font-size:14px;
+  color:red;
+}
+</style>
+</head>
+<body>
+<div class="login-box">
+  <h2>Owner Login</h2>
+  <input type="password" id="ownerPass" placeholder="Enter Owner Password">
+  <p class="msg" id="msg"></p>
+  <button onclick="loginOwner()">Login</button>
+</div>
+
+<script>
+function loginOwner() {
+  const pass = document.getElementById('ownerPass').value;
+  const msg = document.getElementById('msg');
+
+  if(pass === "Saniya@0523") {
+    localStorage.setItem("ownerLoggedIn", "true");
+    window.location.href = "owner.html"; // Redirect to full dashboard
+  } else {
+    msg.innerText = "Incorrect Password!";
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Select Auto | MoveMaster</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+
+* { box-sizing: border-box; font-family:'Baloo 2', cursive; margin:0; padding:0; }
+
+body {
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  padding-top:70px;
+  background:
+      linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+      url("images/map.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+.navbar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:60px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 30px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.15);
+  z-index:999;
+}
+
+.nav-left{ font-size:20px; font-weight:600; color:#0aa2e6; }
+
+.card {
+    background: white;
+    width: 900px;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.top { display:flex; justify-content:space-between; align-items:center; }
+
+.top img { width:140px; }
+
+h2 { color:#0aa2e6; }
+
+.route { margin-top:5px; font-size:16px; color:#555; }
+
+.info { text-align:center; margin:15px 0; color:#444; }
+
+.autos {
+    display:grid;
+    grid-template-columns: repeat(4,1fr);
+    gap:15px;
+}
+
+.auto {
+    border:2px solid #eee;
+    border-radius:15px;
+    padding:15px;
+    text-align:center;
+    transition:0.3s;
+}
+
+.auto:hover {
+    border-color:#0aa2e6;
+    transform:translateY(-5px);
+    box-shadow:0 10px 20px rgba(0,0,0,0.15);
+}
+
+.auto img { width:90px; }
+
+.price { font-size:16px; font-weight:bold; color:#0aa2e6; margin:8px 0; }
+
+.eta { font-size:13px; color:#666; }
+
+button {
+    margin-top:8px;
+    background:#0aa2e6;
+    border:none;
+    color:white;
+    padding:9px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button:hover { background:#088ac7; }
+
+@media (max-width:900px){
+  .autos{ grid-template-columns:repeat(2,1fr); }
+  .top{ flex-direction:column; gap:10px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+  <div class="nav-left">🛺 MoveMaster</div>
+</div>
+
+<div class="card">
+
+  <div class="top">
+    <div>
+      <h2>🛺 Choose Your Auto</h2>
+      <div class="route">
+        📍 <b id="pickup"></b> → <b id="drop"></b> 
+        (Distance: <span id="d"></span> KM)
+      </div>
+    </div>
+    <img src="images/riksha2.jpg">
+  </div>
+
+  <div class="info">Fare Rate: ₹25 / KM</div>
+  <div class="autos" id="autoList"></div>
+
+</div>
+
+<script>
+
+// ===== CLEAR OLD RIDE =====
+let oldRide = JSON.parse(localStorage.getItem("currentRide"));
+if (oldRide && oldRide.status === "completed") {
+    localStorage.removeItem("currentRide");
+}
+
+// ===== ROUTE DATA =====
+const distance = Number(localStorage.getItem("distance")) || 1;
+const pickup = localStorage.getItem("pickup") || "Pickup";
+const drop = localStorage.getItem("drop") || "Drop";
+
+document.getElementById("d").innerText = distance.toFixed(2);
+document.getElementById("pickup").innerText = pickup;
+document.getElementById("drop").innerText = drop;
+
+const baseFare = distance * 25;
+
+// ===== AUTO OPTIONS =====
+const autos = [
+  { name:"Mini Auto", extra:0, eta:"5–7 min", img:"images/riksha2.jpg" },
+  { name:"Standard Auto", extra:10, eta:"4–6 min", img:"images/riksha2.jpg" },
+  { name:"Comfort Auto", extra:20, eta:"3–5 min", img:"images/riksha2.jpg" },
+  { name:"Electric Auto", extra:15, eta:"4–6 min", img:"images/riksha2.jpg" }
+];
+
+const autoList = document.getElementById("autoList");
+
+autos.forEach(auto=>{
+  const total = baseFare + auto.extra;
+
+  const div = document.createElement("div");
+  div.className="auto";
+
+  div.innerHTML=`
+    <img src="${auto.img}">
+    <h4>${auto.name}</h4>
+    <div class="price">₹${total}</div>
+    <div class="eta">⏱ ETA: ${auto.eta}</div>
+    <button onclick="selectAuto('${auto.name}',${total})">Select</button>
+  `;
+
+  autoList.appendChild(div);
+});
+
+// ===== SELECT AUTO =====
+function selectAuto(type, price){
+
+  const userEmail = localStorage.getItem("loggedInEmail");
+
+  if(!userEmail){
+    alert("Please login first");
+    return;
+  }
+
+  const ride = {
+    id: Date.now(),
+    user: userEmail,
+    autoType: type,
+    pickup: pickup,
+    drop: drop,
+    fare: price,
+    status: "REQUESTED",
+    otp: null,
+    otpVerified: false,
+    paymentStatus: "pending",
+    time: new Date()
+  };
+
+  // Push to pending queue (for driver)
+  let rideQueue = JSON.parse(localStorage.getItem("pendingRides")) || [];
+  rideQueue.push(ride);
+  localStorage.setItem("pendingRides", JSON.stringify(rideQueue));
+
+  alert("🚕 Ride Requested!\nWaiting for driver to accept...");
+}
+
+// ===== WAIT FOR DRIVER =====
+let rideCheck = setInterval(()=>{
+  const ride = JSON.parse(localStorage.getItem("currentRide"));
+  if(!ride) return;
+
+  const statusDiv = document.getElementById("rideStatusMessage");
+  if(!statusDiv){
+      const div = document.createElement("div");
+      div.id = "rideStatusMessage";
+      div.style.padding = "10px";
+      div.style.margin = "10px 0";
+      div.style.border = "2px solid #0aa2e6";
+      div.style.borderRadius = "8px";
+      div.style.background = "#e0f7ff";
+      div.style.color = "#0aa2e6";
+      document.body.prepend(div);
+  }
+
+  if(ride.status==="accepted"){
+    document.getElementById("rideStatusMessage").innerHTML = `
+      🚖 Your ride has been <b>accepted by the driver</b>! <br>
+      <button id="goToOtp">Go to OTP Page</button>
+    `;
+
+    document.getElementById("goToOtp").onclick = ()=>{
+      window.location.href = "otp.html";
+    };
+
+  }
+
+  if(ride.status==="completed"){
+    clearInterval(rideCheck);
+    window.location.href="payment.html";
+  }
+
+},3000);
+
+</script>
+</body>
+</html>
