@@ -103,17 +103,7 @@ app.post("/api/signup", async (req, res) => {
 });
 
 // LOGIN
-app.post("/api/login", async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) return res.status(400).json({ msg: "Email not found" });
 
-  // ✅ Set session
-  req.session.userId = user._id;
-  req.session.userEmail = user.email;
-
-  res.json({ user });
-});
 
 // ======== GOOGLE AUTH ========
 
