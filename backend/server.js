@@ -13,10 +13,9 @@ const app = express();
 const rideRoutes = require("./routes/rideRoutes");
 
 // ======== MONGODB ========
-mongoose.connect("mongodb://127.0.0.1:27017/ride2", { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("MongoDB connected"))
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Atlas connected"))
   .catch(err => console.error(err));
-
 // ======== MIDDLEWARE ========
 app.use(cors({
   origin: ["http://127.0.0.1:8080", "http://localhost:8080"], // frontend URL
