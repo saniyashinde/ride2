@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const passport = require("passport");
-
+const User = require("../models/User");
 // Google login start
 router.get(
   "/google",
