@@ -84,7 +84,7 @@ app.get('/api/owner/drivers', async (req, res) => {
 });
 
 // ======== USER SIGNUP / LOGIN ========
-const User = require('./models/user');
+const User = require('./models/User');
 
 // SIGNUP
 app.post("/api/signup", async (req, res) => {
