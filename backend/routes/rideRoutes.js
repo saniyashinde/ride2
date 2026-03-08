@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 
-const Ride = require("../models/ride");   // Ride schema must have timestamps
+const Ride = require("../models/Ride");   // Ride schema must have timestamps
 const User = require("../models/User");
 const Driver = require("../models/Driver");
 
