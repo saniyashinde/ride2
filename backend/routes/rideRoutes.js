@@ -125,6 +125,17 @@ router.post("/complete-ride", async (req, res) => {
 });
 
 // ===============================
+// GET ALL RIDES
+// ===============================
+router.get("/", async (req, res) => {
+  try {
+    const rides = await Ride.find();
+    res.json(rides);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+// ===============================
 // 📌 PENDING RIDES
 // ===============================
 router.get("/pending", async (req, res) => {
