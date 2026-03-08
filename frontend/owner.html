@@ -85,7 +85,7 @@ th, td { padding:8px; text-align:center; }
 </div>
 
 <script>
-const API = "http://localhost:5000/api/owner";
+const API = "https://ride2-6.onrender.com/api/owner";
 
 // ===============================
 // ADD DRIVER
@@ -166,7 +166,7 @@ async function loadDrivers() {
   `;
 
   try {
-    const res = await fetch("http://localhost:5000/api/driver/all");
+    const res = await fetch("https://ride2-6.onrender.com/api/driver/all");
     const drivers = await res.json();
     const blockedDrivers = JSON.parse(localStorage.getItem("blockedDrivers") || "[]");
 
@@ -224,7 +224,7 @@ async function loadUsers() {
 
   let users = [];
   try {
-    const res = await fetch("http://localhost:5000/api/users");
+    const res = await fetch("https://ride2-6.onrender.com/api/users");
     if (!res.ok) throw new Error("API failed");
     users = await res.json();
   } catch (err) {
@@ -273,7 +273,7 @@ async function loadActiveRidesMap() {
   errMsg.innerText = "";
 
   try {
-    const res = await fetch("http://localhost:5000/api/driver/locations");
+    const res = await fetch("https://ride2-6.onrender.com/api/driver/locations");
     const drivers = await res.json();
 
     const mapDiv = document.getElementById("map");

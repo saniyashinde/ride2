@@ -108,7 +108,7 @@ async function createAccount() {
   }
 
   try {
-    const res = await fetch("http://127.0.0.1:5000/api/signup", {
+    const res = await fetch("https://ride2-6.onrender.com/api/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",   // ⭐ SESSION ENABLED
@@ -146,7 +146,7 @@ async function continueLogin() {
   const email = document.getElementById("email").value.trim();
 
   try {
-    const res = await fetch("http://127.0.0.1:5000/api/login", {
+    const res = await fetch("https://ride2-6.onrender.com/api/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",   // ⭐ SESSION ENABLED
@@ -186,7 +186,7 @@ function onGoogleLoginSuccess(response) {
   localStorage.setItem("loggedInEmail", data.email);
 
   // Optional: send Google user to backend
-  fetch("http://127.0.0.1:5000/api/signup", {
+  fetch("https://ride2-6.onrender.com/api/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",   // ⭐ SESSION ENABLED

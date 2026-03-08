@@ -5,7 +5,7 @@ if (!pickup || !drop) {
   alert("Pickup or Drop not provided!");
 }
 
-fetch(`http://localhost:5000/api/rides/distance?pickup=${pickup}&drop=${drop}`)
+fetch(`https://ride2-6.onrender.com/api/rides/distance?pickup=${pickup}&drop=${drop}`)
   .then(res => res.json())
   .then(data => {
     document.getElementById("routeInfo").innerText =
@@ -40,7 +40,7 @@ function showAutos(distanceKm) {
 }
 
 function selectAuto(type, price, distance) {
-  fetch("http://localhost:5000/api/rides/create", {
+  fetch("https://ride2-6.onrender.com/api/rides/create", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

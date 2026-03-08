@@ -248,7 +248,7 @@ button:hover{
 
   <div class="left">
     <div class="header">
-      <h2>🛺 Book Your Auto</h2>
+      <h2>🛺 Book Your Auto 🛺</h2>
       <p>Quick & comfortable rides in your city</p>
     </div>
 
@@ -350,7 +350,7 @@ async function bookRide() {
   localStorage.setItem("fare", fare);
 
   // 4️⃣ 🔥 BACKEND: SAVE RIDE (ONLY ONCE)
-  await fetch("http://localhost:5000/api/rides/book-ride", {
+  await fetch("https://ride2-6.onrender.com/api/rides/book-ride", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

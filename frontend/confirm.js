@@ -4,7 +4,7 @@ document.getElementById("rideInfo").innerText =
 function sendOTP() {
   const mobile = document.getElementById("mobile").value;
 
-  fetch("http://localhost:5000/api/otp/send", {
+  fetch("https://ride2-6.onrender.com/api/otp/send", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ mobile })
@@ -20,7 +20,7 @@ function verifyOTP() {
   const mobile = document.getElementById("mobile").value;
   const otp = document.getElementById("otp").value;
 
-  fetch("http://localhost:5000/api/otp/verify", {
+  fetch("https://ride2-6.onrender.com/api/otp/verify-otp", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ mobile, otp })
@@ -34,7 +34,7 @@ function verifyOTP() {
     }
   });
 }
-const socket = io("http://localhost:5000");
+const socket = io("https://ride2-6.onrender.com");
 const rideId = localStorage.getItem("rideId");
 
 if (navigator.geolocation) {

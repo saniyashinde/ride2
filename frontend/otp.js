@@ -17,7 +17,7 @@ function verifyOTP() {
   const mobile = document.getElementById("mobile").value;
   const otp = document.getElementById("otp").value;
 
-  fetch("http://localhost:5000/api/otp/verify", {
+  fetch("https://ride2-6.onrender.com/api/otp/verify-otp", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ mobile, otp })

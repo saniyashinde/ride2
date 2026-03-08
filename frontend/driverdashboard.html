@@ -152,7 +152,7 @@ let currentRide = JSON.parse(localStorage.getItem("currentRide")) || null;
 // ===============================
 async function fetchPendingRides() {
   try {
-    const res = await fetch(`http://localhost:5000/api/rides/pending`);
+    const res = await fetch(`https://ride2-6.onrender.com/api/rides/pending`);
     const rides = await res.json();
     const container = document.getElementById("rideRequests");
     container.innerHTML = "";
@@ -186,7 +186,7 @@ async function fetchPendingRides() {
 // ===============================
 async function acceptRide(rideId) {
   try {
-    const res = await fetch("http://localhost:5000/api/rides/accept-ride", {
+    const res = await fetch("https://ride2-6.onrender.com/api/rides/accept-ride", {
       method: "POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify({ rideId, driverId })
@@ -255,36 +255,47 @@ function verifyOTP() {
 // ===============================
 // COMPLETE RIDE (Local)
 // ===============================
-function completeRide(paymentMode) {
+async function completeRide(paymentMode) {
   let currentRide = JSON.parse(localStorage.getItem("currentRide"));
   if (!currentRide) return alert("❌ No ride active");
 
-  // Get driver data or initialize
-  let driverData = JSON.parse(localStorage.getItem("driverData")) || { totalRides: 0 };
+  try {
+    const res = await fetch("https://ride2-6.onrender.com/api/rides/complete-ride", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        rideId: currentRide._id,
+        driverId: driverId,
+        paymentMode
+      })
+    });
 
-  // Complete the ride
-  alert(`🎉 Ride Completed!\nPayment Mode: ${paymentMode}`);
+    const data = await res.json();
 
-  // Update ride status
-  document.getElementById("rideStatus").innerText = "IDLE";
-  document.getElementById("rideStatus").style.background = "#ccc";
+    if (res.ok) {
+      alert(`🎉 Ride Completed!\nPayment Mode: ${paymentMode}`);
 
-  // Increment total rides
-  driverData.totalRides += 1;
-  localStorage.setItem("driverData", JSON.stringify(driverData));
+      // Remove current ride
+      localStorage.removeItem("currentRide");
 
-  // Update UI immediately
-  document.getElementById("totalRides").innerText = driverData.totalRides;
+      // Update UI
+      document.getElementById("rideStatus").innerText = "IDLE";
+      document.getElementById("rideStatus").style.background = "#ccc";
 
-  // Remove current ride
-  localStorage.removeItem("currentRide");
+      // Update driver total rides (optional)
+      let driverData = JSON.parse(localStorage.getItem("driverData")) || { totalRides: 0 };
+      driverData.totalRides += 1;
+      localStorage.setItem("driverData", JSON.stringify(driverData));
+      document.getElementById("totalRides").innerText = driverData.totalRides;
 
-  // Hide complete buttons and OTP box
-  document.getElementById("completeBox").style.display = "none";
-  document.getElementById("otpBox").style.display = "none";
-
-  // Refresh last ride display
-  showLastAcceptedRide();
+      fetchPendingRides();  // refresh pending rides
+    } else {
+      alert("Error completing ride: " + data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Server error while completing ride");
+  }
 }
 // ===============================
 // LEAFLET MAP INIT
@@ -296,7 +307,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 
 async function loadDriverLocations() {
   try {
-    const res = await fetch("http://localhost:5000/api/drivers/locations");
+    const res = await fetch("https://ride2-6.onrender.com/api/drivers/locations");
     const drivers = await res.json();
 
     drivers.forEach(d => {
