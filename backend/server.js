@@ -4,39 +4,55 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require('passport');
-require('./googleAuth');
+const bcrypt = require('bcrypt');
+require('./googleAuth'); // Google OAuth config
 
-// ✅ CREATE APP FIRST
+// ======== MODELS ========
+const User = require('./models/User');
+const Driver = require('./models/Driver');
+const Ride = require('./models/Ride');
+
+// ======== CREATE APP ========
 const app = express();
 
-// ======== MONGODB ========
-mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/ride2", {
+// ======== MONGODB CONNECT ========
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-  .then(() => console.log("MongoDB connected"))
-  .catch(err => console.error(err));
+.then(() => console.log("✅ MongoDB Atlas connected"))
+.catch(err => console.error("❌ MongoDB connection error:", err));
 
-// ======== MIDDLEWARE ========
-const FRONTEND_URL = "https://ride2-7.onrender.com"; // <-- your Render frontend URL
+// ======== CORS ========
+const allowedOrigins = [
+  "http://127.0.0.1:8080",
+  "http://localhost:8080",
+  "https://ride2-6.onrender.com",
+  "https://ride2-7.onrender.com"
+];
 
 app.use(cors({
-  origin: [FRONTEND_URL],
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // for Postman / mobile
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS not allowed'));
+  },
   credentials: true
 }));
 
+// ======== MIDDLEWARE ========
+app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET || 'session_secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // use HTTPS on Render
+    secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
 
-app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -44,18 +60,15 @@ app.use(passport.session());
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/rides', require('./routes/rideRoutes'));
 app.use('/api/owner', require('./routes/ownerRoutes'));
-app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/driver", require("./routes/driverRoutes"));
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/driver', require('./routes/driverRoutes'));
 
-// ======== DRIVER ADD/GET (Optional) ========
-const Driver = require('./models/Driver');
-const User = require('./models/User'); // Needed for login route
-
+// ======== DRIVER ADD/GET ========
 app.post('/api/owner/drivers', async (req, res) => {
-  try {
-    const { name, contact } = req.body;
-    if (!name || !contact) return res.status(400).json({ message: "All fields required" });
+  const { name, contact } = req.body;
+  if (!name || !contact) return res.status(400).json({ message: "All fields required" });
 
+  try {
     const driver = new Driver({ name, contact });
     await driver.save();
     res.json(driver);
@@ -75,55 +88,77 @@ app.get('/api/owner/drivers', async (req, res) => {
   }
 });
 
-// ======== USER SIGNUP / LOGIN ========
+// ======== USER SIGNUP ========
+app.post("/api/users/signup", async (req, res) => {
+  const { email, password, name, image } = req.body;
 
-// SIGNUP
-app.post("/api/signup", async (req, res) => {
-  const { email, password } = req.body;
-  const existingUser = await User.findOne({ email });
-  if (existingUser) return res.status(400).json({ msg: "Email exists" });
+  try {
+    if (!email || !password) return res.status(400).json({ msg: "Email and password required" });
 
-  const user = new User({ email, password });
-  await user.save();
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ msg: "Email already exists" });
 
-  // ✅ Set session
-  req.session.userId = user._id;
-  req.session.userEmail = user.email;
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  res.json({ user });
+    const user = new User({
+      email,
+      password: hashedPassword,
+      name: name || "",
+      image: image || ""
+    });
+
+    await user.save();
+
+    req.session.userId = user._id;
+    req.session.userEmail = user.email;
+
+    res.json({ user });
+  } catch (err) {
+    console.error("Signup error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
 });
 
-// LOGIN
-app.post("/api/login", async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) return res.status(400).json({ msg: "Email not found" });
+// ======== USER LOGIN ========
+app.post('/api/users/login', async (req, res) => {
+  const { email, password } = req.body;
 
-  // ✅ Set session
-  req.session.userId = user._id;
-  req.session.userEmail = user.email;
+  try {
+    if (!email || !password) return res.status(400).json({ msg: "Email and password required" });
 
-  res.json({ user });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: "Invalid email or password" });
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ msg: "Invalid email or password" });
+
+    req.session.userId = user._id;
+    req.session.userEmail = user.email;
+
+    res.json({ user });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ msg: "Server error" });
+  }
 });
 
 // ======== GOOGLE AUTH ========
-
-// Login with Google
 app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'], prompt: "select_account" })
 );
 
-// Google callback
 app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: `${FRONTEND_URL}/login.html` }),
+  passport.authenticate('google', { failureRedirect: "https://ride2-7.onrender.com/login.html" }),
   (req, res) => {
-    req.session.userId = req.user._id; // store logged-in user in session
-    res.redirect(`${FRONTEND_URL}/booking.html`);
+    req.session.userId = req.user._id;
+    req.session.userEmail = req.user.email;
+    res.redirect("https://ride2-7.onrender.com/booking.html");
   }
 );
 
+// ======== DEFAULT ROUTE ========
+app.get("/", (req, res) => res.send("🚀 Ride2 backend is running"));
+
 // ======== START SERVER ========
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
