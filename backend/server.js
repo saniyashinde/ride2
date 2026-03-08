@@ -18,7 +18,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error(err));
 // ======== MIDDLEWARE ========
 app.use(cors({
-  origin: ["http://127.0.0.1:8080", "http://localhost:8080"], // frontend URL
+  origin: ["http://127.0.0.1:8080", "http://localhost:8080","https://ride2-6.onrender.com" ],// frontend URL
   credentials: true
 }));
 
@@ -35,6 +35,10 @@ app.use(session({
 app.use(express.json());
 app.use(passport.initialize());
 app.use(passport.session());
+// ✅ ADD THIS HERE
+app.get("/", (req, res) => {
+  res.send("Ride2 backend is running 🚀");
+});
 
 // ======== ROUTES ========
 app.use('/api/users', require('./routes/userRoutes'));
@@ -114,10 +118,10 @@ app.get('/auth/google',
 
 // Google callback
 app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: "http://localhost:8080/login.html" }),
+  passport.authenticate('google', { failureRedirect: "https://ride2-6.onrender.com/login.html" }),
   (req, res) => {
     req.session.userId = req.user._id; // store logged-in user in session
-    res.redirect("http://localhost:8080/booking.html");
+   res.redirect("https://ride2-6.onrender.com/booking.html");
   }
 );
 
