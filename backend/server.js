@@ -148,11 +148,11 @@ app.get('/auth/google',
 );
 
 app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: "https://ride2-7.onrender.com/login.html" }),
+  passport.authenticate('google', { failureRedirect: "https://ride2-6.onrender.com/login.html" }),
   (req, res) => {
     req.session.userId = req.user._id;
     req.session.userEmail = req.user.email;
-    res.redirect("https://ride2-7.onrender.com/booking.html");
+    res.redirect("https://ride2-6.onrender.com/booking.html");
   }
 );
 
