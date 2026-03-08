@@ -18,7 +18,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error(err));
 // ======== MIDDLEWARE ========
 app.use(cors({
-  origin: ["http://127.0.0.1:8080", "http://localhost:8080","https://ride2-6.onrender.com" ],// frontend URL
+  origin: ["http://127.0.0.1:8080", "http://localhost:8080","https://ride2-6.onrender.com" ,"https://ride2-7.onrender.com"],// frontend URL
   credentials: true
 }));
 
