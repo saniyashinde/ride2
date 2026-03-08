@@ -86,7 +86,23 @@ app.get('/api/owner/drivers', async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+const User = require('./models/User'); // <-- move to top
 
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ msg: "Email not registered" });
+
+    // optional password check
+    // if (user.password !== password) return res.status(400).json({ msg: "Invalid password" });
+
+    req.session.userId = user._id;
+    res.json({ msg: "Login successful", user });
+  } catch (err) {
+    res.status(500).json({ msg: "Server error" });
+  }
+});
 // ======== USER SIGNUP / LOGIN ========
 const User = require('./models/User');
 
