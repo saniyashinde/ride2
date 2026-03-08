@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const passport = require("passport");
 const User = require("../models/User");
+
 // Google login start
 router.get(
   "/google",
@@ -11,12 +12,12 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "http://localhost:5000/login.html",
+    failureRedirect: "https://ride2-5.onrender.com/login.html",
   }),
   (req, res) => {
-    // success
-    req.session.userId = req.user._id; // 🔥 VERY IMPORTANT
-    res.redirect("http://localhost:5000/booking.html");
+    req.session.userId = req.user._id;
+
+    res.redirect("https://ride2-5.onrender.com/booking.html");
   }
 );
 
