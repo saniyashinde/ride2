@@ -94,7 +94,7 @@ router.get("/users", async (req, res) => {
 router.get("/active-rides", async (req, res) => {
   try {
     const rides = await Ride.find({
-      status: { $in: ["Pending", "Ongoing"] }
+      status: { $in: ["pending", "ongoing"] }
     })
     .populate("userId", "email")
     .populate("driverId", "name");
