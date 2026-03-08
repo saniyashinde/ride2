@@ -20,7 +20,7 @@ const rideSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    default: "Pending"
+    default: "pending"
   },
 
   paymentMode: String,
