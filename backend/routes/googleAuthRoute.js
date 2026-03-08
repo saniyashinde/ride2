@@ -12,12 +12,12 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", {
-    failureRedirect: "https://ride2-5.onrender.com/login.html",
+    failureRedirect: "https://ride2-6.onrender.com/login.html",
   }),
   (req, res) => {
     req.session.userId = req.user._id;
 
-    res.redirect("https://ride2-5.onrender.com/booking.html");
+    res.redirect("https://ride2-6.onrender.com/booking.html");
   }
 );
 

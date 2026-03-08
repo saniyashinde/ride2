@@ -17,7 +17,7 @@ router.post("/send", (req, res) => {
   });
 });
 
-router.post("/verify", (req, res) => {
+router.post("/verify-otp", (req, res) => {
   const { mobile, otp } = req.body;
 
   if (otpStore[mobile] == otp) {
