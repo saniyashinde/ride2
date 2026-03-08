@@ -186,7 +186,7 @@ function onGoogleLoginSuccess(response) {
   localStorage.setItem("loggedInEmail", data.email);
 
   // Optional: send Google user to backend
-  fetch("https://ride2-7.onrender.com/api/signup", {
+  fetch("https://ride2-6.onrender.com/api/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",   // ⭐ SESSION ENABLED
