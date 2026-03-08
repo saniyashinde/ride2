@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Driver = require("../models/Driver");
 const User = require("../models/User");
-const Ride = require("../models/tempRide");
+const Ride = require("../models/Ride");
 
 /* ===============================
    ADD DRIVER
