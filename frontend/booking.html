@@ -350,7 +350,7 @@ async function bookRide() {
   localStorage.setItem("fare", fare);
 
   // 4️⃣ 🔥 BACKEND: SAVE RIDE (ONLY ONCE)
-  await fetch("https://ride2-6.onrender.com/api/rides/book-ride", {
+  await fetch("https://ride2-7.onrender.com/api/rides/book-ride", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
