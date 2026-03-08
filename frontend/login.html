@@ -17,7 +17,6 @@ body{
   background:linear-gradient(135deg,#0aa2e6,#42d1f5);
 }
 
-/* CARD */
 .signup-box{
   background:#fff;
   padding:32px;
@@ -56,6 +55,7 @@ body{
   border-radius:8px;
   border:1px solid #ccc;
   outline:none;
+  box-sizing:border-box;
 }
 
 .signup-box input:focus{
@@ -122,7 +122,7 @@ body{
 </div>
 
 <script>
-  const savedEmail = localStorage.getItem("deviceUserEmail");
+const savedEmail = localStorage.getItem("deviceUserEmail");
 
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -131,10 +131,9 @@ const passwordMsg = document.getElementById("password-msg");
 const msg = document.getElementById("msg");
 
 const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const passwordPattern = /^.{8,}$/; // just minimum 8 chars, backend accepts
 
-/* LIVE VALIDATION */
-//new quick
+// Show returning user UI
 if (savedEmail) {
   passwordInput.style.display = "none";
   passwordMsg.style.display = "none";
@@ -143,37 +142,38 @@ if (savedEmail) {
   msg.className = "msg valid";
 }
 
-emailInput.addEventListener("input",()=>{
-  if(!emailInput.value){
-    emailMsg.innerText="";
-  }else if(!emailPattern.test(emailInput.value)){
-    emailMsg.innerText="❌ Enter valid Gmail";
-    emailMsg.className="msg error";
-  }else{
-    emailMsg.innerText="✅ Valid Gmail";
-    emailMsg.className="msg valid";
+// LIVE VALIDATION
+emailInput.addEventListener("input", () => {
+  if (!emailInput.value) {
+    emailMsg.innerText = "";
+  } else if (!emailPattern.test(emailInput.value)) {
+    emailMsg.innerText = "❌ Enter valid Gmail";
+    emailMsg.className = "msg error";
+  } else {
+    emailMsg.innerText = "✅ Valid Gmail";
+    emailMsg.className = "msg valid";
   }
 });
 
-passwordInput.addEventListener("input",()=>{
-  if(!passwordInput.value){
-    passwordMsg.innerText="";
-  }else if(!passwordPattern.test(passwordInput.value)){
-    passwordMsg.innerText="❌ Min 8 chars, number & special char";
-    passwordMsg.className="msg error";
-  }else{
-    passwordMsg.innerText="✅ Strong password";
-    passwordMsg.className="msg valid";
+passwordInput.addEventListener("input", () => {
+  if (!passwordInput.value) {
+    passwordMsg.innerText = "";
+  } else if (!passwordPattern.test(passwordInput.value)) {
+    passwordMsg.innerText = "❌ Min 8 characters";
+    passwordMsg.className = "msg error";
+  } else {
+    passwordMsg.innerText = "✅ Strong password";
+    passwordMsg.className = "msg valid";
   }
 });
 
-/* SIGNUP */
-function signup(){
-  msg.innerText="";
+// SIGNUP FUNCTION
+function signup() {
+  msg.innerText = "";
   const email = emailInput.value.trim();
   const password = passwordInput.value.trim();
 
-  // RETURNING USER (EMAIL ONLY)
+  // Returning user
   if (savedEmail) {
     if (email === savedEmail) {
       localStorage.setItem("loggedIn", "true");
@@ -186,46 +186,46 @@ function signup(){
     return;
   }
 
-  // NEW USER (FULL SIGNUP)
+  // New user validation
   if (!emailPattern.test(email)) {
-    msg.innerText = "Invalid Gmail address";
+    msg.innerText = "❌ Invalid Gmail address";
     msg.className = "msg error";
     return;
   }
 
   if (!passwordPattern.test(password)) {
-    msg.innerText = "Weak password";
+    msg.innerText = "❌ Weak password (min 8 chars)";
     msg.className = "msg error";
     return;
   }
-fetch("https://ride2-6.onrender.com/api/auth/login", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include",   // 🔥 MUST
-  body: JSON.stringify({ email, password })
-});
 
-  .then(res=>res.json())
-  .then(data=>{
-    if(data.success){
-      // 🔐 SAVE DEVICE USER
+  // Signup fetch call
+  fetch("https://ride2-6.onrender.com/api/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.user) {
+      // Save device info
       localStorage.setItem("deviceUserEmail", email);
       localStorage.setItem("loggedIn", "true");
       localStorage.setItem("loggedInEmail", email);
       localStorage.setItem("userId", data.user._id);
 
-      window.location.href="booking.html";
+      window.location.href = "booking.html";
     } else {
-      msg.innerText = data.message;
+      msg.innerText = data.msg || "Server error";
       msg.className = "msg error";
     }
   })
-  .catch(()=>{
-    msg.innerText="Server error. Try again.";
-    msg.className="msg error";
+  .catch(() => {
+    msg.innerText = "Server error. Try again.";
+    msg.className = "msg error";
   });
 }
-
 </script>
 
 </body>
