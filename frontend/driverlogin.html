@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Driver Login | MoveMaster</title>
+<style>
+body {display:flex;justify-content:center;align-items:center;height:100vh;font-family:'Segoe UI';background:linear-gradient(135deg,#42d1f5,#0aa2e6);margin:0;}
+.login-box {background:#fff;padding:30px 40px;border-radius:15px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.3);width:350px;}
+input,button {width:90%;padding:12px;margin:10px 0;border-radius:8px;border:1px solid #ccc;font-size:16px;}
+button {background:#0aa2e6;color:white;border:none;cursor:pointer;transition:0.3s;}
+button:hover {opacity:0.9;}
+.msg {font-size:14px;color:red;min-height:18px;}
+h2 {margin-bottom:20px;color:#088ac7;}
+</style>
+</head>
+<body>
+<div class="login-box">
+  <h2>Driver Login</h2>
+  <input type="text" id="driverName" placeholder="Enter Your Name">
+  <input type="password" id="driverCode" placeholder="Enter Access Code">
+  <p class="msg" id="msg"></p>
+  <button onclick="loginDriver()">Login</button>
+</div>
+
+<script>
+function loginDriver(){
+  const name = document.getElementById("driverName").value.trim();
+  const code = document.getElementById("driverCode").value.trim();
+  const msg = document.getElementById("msg");
+
+  if(!name || !code){
+    msg.innerText="All fields are required!";
+    return;
+  }
+
+  if(code !== "MoveMaster2026"){
+    msg.innerText="Incorrect Access Code!";
+    return;
+  }
+
+  // ✅ Proper unique ID generate
+  const driverId = "DRIVER_" + Date.now();
+
+  localStorage.setItem("driverId", driverId);
+  localStorage.setItem("driverName", name);
+
+  window.location.href = "driverdashboard.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mobile Number Verification | MoveMaster</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+
+/* ===== GLOBAL ===== */
+* { box-sizing: border-box; font-family:'Baloo 2', cursive; margin:0; padding:0; }
+body {
+  background: #f2f2f2;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  padding-top:70px; /* space for navbar */
+  overflow:hidden;
+}
+
+/* ===== NAVBAR ===== */
+.navbar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:60px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 30px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.15);
+  z-index:999;
+}
+
+.nav-left{
+  font-size:20px;
+  font-weight:600;
+  color:#0aa2e6;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.nav-center{
+  display:flex;
+  gap:25px;
+}
+
+.nav-center a{
+  text-decoration:none;
+  color:#333;
+  font-size:15px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.nav-center a:hover{ color:#0aa2e6; }
+
+.profile{ position:relative; }
+
+.profile-btn{
+  cursor:pointer;
+  background:#0aa2e6;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.dropdown{
+  position:absolute;
+  right:0;
+  top:48px;
+  background:#fff;
+  width:160px;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  display:none;
+}
+
+.dropdown a{
+  display:block;
+  padding:12px;
+  text-decoration:none;
+  color:#333;
+  font-size:14px;
+}
+
+.dropdown a:hover{ background:#f2f2f2; }
+
+/* ===== CARD ===== */
+.card {
+  background: white;
+  padding: 30px;
+  width: 360px;
+  text-align: center;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+input {
+  width: 70%;
+  padding: 12px;
+  margin: 15px 0;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #4db8ff;
+  color: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+button:disabled {
+  background: #a6d4ff;
+  cursor: not-allowed;
+}
+
+#msg {
+  margin-top: 15px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.loading {
+  font-size: 14px;
+  color: #333;
+  margin-top: 10px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.3; }
+}
+
+/* Cute popup */
+.otp-popup {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fffbe6;
+  border: 2px solid #ffcc33;
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  font-size: 18px;
+  display: none;
+  text-align: center;
+  z-index: 1000;
+}
+.otp-popup span {
+  font-weight: bold;
+  color: #ff6600;
+  font-size: 22px;
+}
+</style>
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<div class="navbar">
+  <div class="nav-left">🛺 MoveMaster</div>
+
+  <div class="nav-center">
+    <a href="home.html">🏠 Home</a>
+    <a href="services.html">🛺 Services</a>
+    <a href="activity.html">📊 Activity</a>
+    <a href="help.html">🆘 Help</a>
+  </div>
+
+  <div class="profile">
+   <div class="profile-btn" onclick="toggleMenu()">
+      👤  ⌄
+    </div>  <div class="dropdown" id="menu">
+      <a href="profile.html">👤 My Profile</a>
+      <a href="ridehistory.html">📜 Ride History</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CARD ===== -->
+<div class="card">
+  <h3>🛺Mobile Number Verification 🛺</h3>
+  
+  <div>
+    <select id="countryCode">
+      <option value="+91">🇮🇳 +91</option>
+    </select>
+    <input type="text" id="mobile" placeholder="Enter your mobile number" maxlength="10" />
+  </div>
+  
+  <button id="sendBtn" onclick="sendOTP()">Send OTP</button>
+  
+  <p id="msg"></p>
+  <p id="loadingMsg" class="loading"></p>
+</div>
+
+<!-- Cute OTP popup -->
+<div class="otp-popup" id="otpPopup">
+  Your OTP is: <span id="otpCode">1234</span> 🎉
+</div>
+
+<script>
+// NAV USER NAME FROM LOGIN EMAIL
+const email = localStorage.getItem("userEmail");
+if (email) {
+  const name = email.split("@")[0];
+  document.getElementById("navUserName").innerText =
+    name.charAt(0).toUpperCase() + name.slice(1);
+} else {
+  document.getElementById("navUserName").innerText = "Guest";
+}
+
+
+// ===== NAVBAR MENU =====
+function toggleMenu(){
+  const menu=document.getElementById("menu");
+  menu.style.display=menu.style.display==="block"?"none":"block";
+}
+function logout(){
+  localStorage.clear();
+  alert("Logged out successfully");
+  window.location.href="login.html";
+}
+
+// ===== SEND OTP =====
+function sendOTP() {
+  const mobile = document.getElementById('mobile').value.trim();
+  const msg = document.getElementById('msg');
+  const loadingMsg = document.getElementById('loadingMsg');
+  const otpPopup = document.getElementById('otpPopup');
+  const otpCodeSpan = document.getElementById('otpCode');
+
+  if(mobile === "" || mobile.length !== 10 || isNaN(mobile)) {
+    msg.style.color = 'red';
+    msg.textContent = "⚠️ Please enter a valid 10-digit mobile number!";
+    return;
+  }
+
+  msg.textContent = "";
+  document.getElementById('sendBtn').disabled = true;
+
+  // Generate random 4-digit OTP
+ // Generate random 4-digit OTP
+const otp = Math.floor(1000 + Math.random() * 9000).toString();
+otpCodeSpan.textContent = otp;
+
+// 🔥 SAVE OTP INTO CURRENT RIDE (VERY IMPORTANT)
+let ride = JSON.parse(localStorage.getItem("currentRide"));
+
+if (ride) {
+  ride.otp = otp;          // save same OTP
+  ride.otpVerified = false;
+  localStorage.setItem("currentRide", JSON.stringify(ride));
+}
+
+
+  // Show loading message
+  let countdown = 10;
+  loadingMsg.textContent = `📩 Sending OTP to +91-${mobile}... ${countdown}s`;
+
+  const interval = setInterval(() => {
+    countdown--;
+    if(countdown > 0) {
+      loadingMsg.textContent = `📩 Sending OTP to +91-${mobile}... ${countdown}s`;
+    } else {
+      clearInterval(interval);
+      loadingMsg.textContent = "";
+      
+      // Show OTP popup
+      otpPopup.style.display = "block";
+
+      // Auto hide popup after 3 sec
+      setTimeout(() => {
+        otpPopup.style.display = "none";
+
+        // Show confirmation message
+        msg.style.color = 'green';
+        msg.textContent = "✅ Your ride is confirmed! Get ready for your Auto 🛺";
+
+        // Redirect to confirm.html after 2 sec
+        setTimeout(() => {
+          window.location.href = "confirm.html";
+        }, 2000);
+
+      }, 3000);
+    }
+  }, 1000);
+}
+</script>
+
+</body>
+</html>

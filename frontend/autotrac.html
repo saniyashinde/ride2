@@ -1,0 +1,160 @@
+<html >
+<head>
+<title>Live Auto Tracking</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+  body { font-family: Arial; text-align: center; }
+  #map {
+    height: 420px;
+    margin-top: 15px;
+    border-radius: 10px;
+  }
+
+  /* ===== OFFER BUTTON ===== */
+  .offer-btn{
+    margin-top:15px;
+    padding:14px 30px;
+    font-size:16px;
+    background:#0aa2e6;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  .offer-btn:hover{
+    background:#088ac7;
+  }
+</style>
+</head>
+
+<body>
+
+<h2>🛺 Auto On The Way</h2>
+<p>Pickup: <b id="pickupText"></b></p>
+<p>Drop: <b id="dropText"></b></p>
+<p>ETA: <span id="eta">Calculating...</span></p>
+
+<div id="map"></div>
+
+<!-- ✅ BUTTON ADDED -->
+<button class="offer-btn" onclick="goToOfferPage()">
+  Go to check your offer →
+</button>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// ================= GET DATA FROM BOOKING PAGE =================
+const pickupPlace = localStorage.getItem("pickup");
+const dropPlace = localStorage.getItem("drop");
+
+if (!pickupPlace || !dropPlace) {
+  alert("Booking data missing");
+}
+
+document.getElementById("pickupText").innerText = pickupPlace;
+document.getElementById("dropText").innerText = dropPlace;
+
+// ================= MAHARASHTRA BOUNDS =================
+const mhBounds = L.latLngBounds(
+  [15.6, 72.6],
+  [22.1, 80.9]
+);
+
+// ================= MAP =================
+const map = L.map("map", {
+  center: [19.0760, 72.8777], // Mumbai
+  zoom: 11,
+  maxBounds: mhBounds,
+  maxBoundsViscosity: 1.0
+});
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+  .addTo(map);
+
+// ================= MARKERS =================
+let pickupMarker, autoMarker;
+let pickupCoords;
+let auto = { lat: 19.10, lon: 72.85 }; // nearest auto (simulated)
+
+// ================= GEOCODING =================
+async function getCoords(place) {
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place + ", Maharashtra")}`
+  );
+  const data = await res.json();
+  return data[0];
+}
+
+
+// ================= LOAD PICKUP =================
+async function initTracking() {
+  const pickupData = await getCoords(pickupPlace);
+
+  if (!pickupData) {
+    alert("Pickup location not found");
+    return;
+  }
+
+  pickupCoords = {
+    lat: parseFloat(pickupData.lat),
+    lon: parseFloat(pickupData.lon)
+  };
+
+  if (!mhBounds.contains([pickupCoords.lat, pickupCoords.lon])) {
+    alert("Service available only in Maharashtra");
+    return;
+  }
+
+  pickupMarker = L.marker([pickupCoords.lat, pickupCoords.lon])
+    .addTo(map)
+    .bindPopup("Pickup Location 📍")
+    .openPopup();
+
+  autoMarker = L.marker([auto.lat, auto.lon])
+    .addTo(map)
+    .bindPopup("Nearest Auto 🛺");
+
+  map.setView([pickupCoords.lat, pickupCoords.lon], 13);
+
+  setInterval(moveAutoToPickup, 2000);
+}
+
+// ================= DISTANCE =================
+function distance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) *
+    Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) ** 2;
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
+
+// ================= AUTO MOVEMENT =================
+function moveAutoToPickup() {
+  auto.lat += (pickupCoords.lat - auto.lat) * 0.03;
+  auto.lon += (pickupCoords.lon - auto.lon) * 0.03;
+
+  autoMarker.setLatLng([auto.lat, auto.lon]);
+
+  const d = distance(auto.lat, auto.lon, pickupCoords.lat, pickupCoords.lon);
+  const eta = Math.max(1, Math.round((d / 25) * 60));
+  document.getElementById("eta").innerText = eta + " min";
+}
+
+// ================= BUTTON FUNCTION =================
+function goToOfferPage(){
+  window.location.href = "offer.html";
+}
+
+// START
+initTracking();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MoveMaster | Book Auto Rides</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #0aa2e6, #42d1f5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+
+    .card {
+      background: #ffffff;
+      color: #333;
+      width: 420px;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .logo {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      color: #0aa2e6;
+    }
+
+    .tagline {
+      font-size: 15px;
+      color: #555;
+      margin: 15px 0 30px;
+    }
+
+    .features {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .features div {
+      width: 30%;
+    }
+
+    .features span {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+
+    .signup {
+      background: #0aa2e6;
+      color: #fff;
+    }
+
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid #ccc;
+      background: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .google-btn img {
+      width: 18px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    /* ✅ FIXED FOOTER */
+    .footer {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #777;
+      text-align: center;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card">
+    <div class="logo">🛺🛺</div>
+    <h1>MoveMaster</h1>
+
+    <div class="tagline">
+      Book fast, affordable & reliable auto-rickshaw rides in your city
+    </div>
+
+    <div class="features">
+      <div>
+        <span>⚡</span>
+        Fast Booking
+      </div>
+      <div>
+        <span>📍</span>
+        Live Pickup
+      </div>
+      <div>
+        <span>💰</span>
+        Low Fare
+      </div>
+    </div>
+
+    <button class="signup" onclick="goToSignup()">Create Account</button>
+
+    <button class="google-btn" onclick="googleLogin()">
+      <img src="https://developers.google.com/identity/images/g-logo.png">
+      Login with Google
+    </button>
+
+      <!--new-->
+      <button id="continueBtn" class="signup" style="display:none;" onclick="continueLogin()">
+  🔓 Continue as <span id="continueEmail"></span>
+</button>
+
+
+    
+    <!-- ✅ MOVED INSIDE CARD -->
+    <div class="footer">
+      Your everyday auto ride partner 🛺🛺
+    </div>
+
+  </div>
+
+  <script>
+    function googleLogin() {
+      window.location.href = "https://ride2-6.onrender.com/auth/google";
+    }
+
+    function goToSignup() {
+      window.location.href = "signup.html";
+    }
+//new
+
+    
+  </script>
+
+</body>
+</html>

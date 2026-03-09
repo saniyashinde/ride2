@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Services | MoveMaster</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+
+body {
+  font-family: 'Baloo 2', cursive;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  width: 100%;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+.nav-left {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0aa2e6;
+}
+.nav-center a {
+  margin: 0 15px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: 0.3s;
+}
+.nav-center a:hover {
+  color: #0aa2e6;
+}
+
+/* ===== HEADER ===== */
+.header {
+  text-align: center;
+  margin: 30px 0 20px;
+}
+.header h2 {
+  font-size: 32px;
+  color: #0aa2e6;
+  margin-bottom: 10px;
+}
+.header p {
+  color: #555;
+  font-size: 16px;
+}
+
+/* ===== SERVICE CARDS ===== */
+.services {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  width: 90%;
+  max-width: 1100px;
+  margin-bottom: 40px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+/* Icon animation */
+.card .icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  transition: transform 0.3s;
+}
+.card:hover .icon {
+  transform: rotate(15deg) scale(1.2);
+}
+
+.card h3 {
+  margin: 10px 0 8px;
+  color: #0aa2e6;
+}
+.card p {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.4;
+}
+
+/* Confetti burst on click */
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffcc00;
+  opacity: 0.8;
+  animation: burst 1s linear forwards;
+}
+@keyframes burst {
+  0% { transform: translate(0,0) scale(1); opacity:1; }
+  100% { transform: translate(var(--x), var(--y)) scale(0.5); opacity:0; }
+}
+
+button.back {
+  padding: 10px 20px;
+  background: #0aa2e6;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  margin-bottom: 40px;
+  transition: 0.3s;
+}
+button.back:hover {
+  background: #088ac7;
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-left">🛺 MoveMaster</div>
+  <div class="nav-center">
+    <a href="booking.html">🏠 Home</a>
+    <a href="services.html">🛺 Services</a>
+    <a href="activity.html">📊 Activity</a>
+    <a href="help.html">🆘 Help</a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <h2>Our Exciting Services!</h2>
+  <p>Fun, safe, and lightning-fast rides — plus extras to make your day happier! 🎉</p>
+</div>
+
+<!-- SERVICE CARDS -->
+<div class="services">
+  <div class="card" onclick="celebrate(this)">
+    <div class="icon">🛺</div>
+    <h3>Quick Auto Rides</h3>
+    <p>Fastest rides in your city with real-time tracking and minimal waiting time!</p>
+  </div>
+
+  <div class="card" onclick="celebrate(this)">
+    <div class="icon">🎁</div>
+    <h3>Surprise Offers</h3>
+    <p>Get random discounts, festive gifts, and exciting cashback on every ride!</p>
+  </div>
+
+  <div class="card" onclick="celebrate(this)">
+    <div class="icon">💎</div>
+    <h3>Premium Comfort</h3>
+    <p>Ride in style with extra space, clean interiors, and comfy seats.</p>
+  </div>
+
+  <div class="card" onclick="celebrate(this)">
+    <div class="icon">🕹️</div>
+    <h3>Fun Extras</h3>
+    <p>Play mini-games, share rides with friends, and collect loyalty points!</p>
+  </div>
+
+  <div class="card" onclick="celebrate(this)">
+    <div class="icon">📸</div>
+    <h3>Photo Memories</h3>
+    <p>Capture your ride moments and get cute ride-themed stickers! 📷✨</p>
+  </div>
+
+  <div class="card" onclick="celebrate(this)">
+    <div class="icon">🎶</div>
+    <h3>Music On Ride</h3>
+    <p>Choose your favorite playlist while riding to feel the vibe! 🎵</p>
+  </div>
+</div>
+
+<a class="back" href="booking.html">← Back to Home</a>
+
+<script>
+// Confetti effect on card click
+function celebrate(card) {
+  for(let i=0;i<20;i++){
+    const c = document.createElement('div');
+    c.className='confetti';
+    const x = (Math.random()*200-100)+'px';
+    const y = (Math.random()*-200)+'px';
+    c.style.setProperty('--x', x);
+    c.style.setProperty('--y', y);
+    card.appendChild(c);
+    setTimeout(()=>c.remove(),1000);
+  }
+  alert("🎉 Enjoy our service! 😄");
+}
+</script>
+
+</body>
+</html>

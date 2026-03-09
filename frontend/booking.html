@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Book Ride | MoveMaster</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  font-family:"Segoe UI", Arial, sans-serif;
+}
+
+/* ===== BODY ===== */
+body{
+  margin:0;
+  background:linear-gradient(135deg,#0aa2e6,#42d1f5);
+  min-height:100vh;
+  padding-top:70px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* ===== NAVBAR ===== */
+.navbar{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:60px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 30px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.15);
+  z-index:999;
+}
+
+.nav-left{
+  font-size:20px;
+  font-weight:600;
+  color:#0aa2e6;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.nav-center{
+  display:flex;
+  gap:25px;
+}
+
+.nav-center a{
+  text-decoration:none;
+  color:#333;
+  font-size:15px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.nav-center a:hover{
+  color:#0aa2e6;
+}
+
+/* PROFILE */
+.profile{
+  position:relative;
+}
+
+.profile-btn{
+  cursor:pointer;
+  background:#0aa2e6;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.dropdown{
+  position:absolute;
+  right:0;
+  top:48px;
+  background:#fff;
+  width:160px;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  display:none;
+}
+
+.dropdown a{
+  display:block;
+  padding:12px;
+  text-decoration:none;
+  color:#333;
+  font-size:14px;
+}
+
+.dropdown a:hover{
+  background:#f2f2f2;
+}
+
+/* ===== CARD ===== */
+.card{
+  background:#fff;
+  width:700px;
+  height:420px;
+  border-radius:20px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.25);
+  display:flex;
+  overflow:hidden;
+}
+
+.left{
+  width:50%;
+  padding:30px;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.header h2{
+  margin:0;
+  color:#0aa2e6;
+}
+
+.header p{
+  font-size:14px;
+  color:#666;
+}
+
+.step{
+  text-align:center;
+  font-size:13px;
+  color:#999;
+  margin-bottom:15px;
+}
+
+.input-box{
+  position:relative;
+  margin-bottom:15px;
+}
+
+.input-box input{
+  width:100%;
+  padding:12px 15px 12px 40px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  outline:none;
+  font-size:15px;
+}
+
+.input-box span{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:18px;
+}
+
+.route{
+  text-align:center;
+  margin:10px 0;
+  color:#0aa2e6;
+  font-size:18px;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  background:#0aa2e6;
+  border:none;
+  border-radius:12px;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#088ac7;
+}
+
+.tip{
+  margin-top:10px;
+  text-align:center;
+  font-size:12px;
+  color:#888;
+}
+
+.right{
+  width:50%;
+  background:#f7f7f7;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.right img{
+  width:90%;
+  max-width:300px;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+  .card{
+    flex-direction:column;
+    height:auto;
+    width:90%;
+  }
+  .left,.right{width:100%;}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<div class="navbar">
+  <div class="nav-left">🛺 MoveMaster</div>
+
+  <div class="nav-center">
+    <a href="home.html">🏠 Home</a>
+    <a href="services.html">🛺 Services</a>
+    <a href="activity.html">📊 Activity</a>
+    <a href="help.html">🆘 Help</a>
+  </div>
+
+  <div class="profile">
+    <div class="profile-btn" onclick="toggleMenu()">
+      👤 ⌄
+    </div>
+
+    <div class="dropdown" id="menu">
+      <a href="profile.html">👤 My Profile</a>
+      <a href="ridehistory.html">📜 Ride History</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CARD ===== -->
+<div class="card">
+
+  <div class="left">
+    <div class="header">
+      <h2>🛺 Book Your Auto 🛺</h2>
+      <p>Quick & comfortable rides in your city</p>
+    </div>
+
+    <div class="step">STEP 1 of 2 • Enter route</div>
+
+    <div class="input-box">
+      <span>📍</span>
+      <input id="pickup" placeholder="Pickup location">
+    </div>
+
+    <div class="route">⬇️</div>
+
+    <div class="input-box">
+      <span>🏁</span>
+      <input id="drop" placeholder="Drop location">
+    </div>
+
+    <button onclick="bookRide()">Find Auto & Book Ride</button>
+    <div class="tip">Tip: Shorter routes = cheaper fares 💸</div>
+  </div>
+
+  <div class="right">
+    <img src="images/riksha.jpg" alt="Auto Rickshaw">
+  </div>
+
+</div>
+
+<script>
+// ===== NAVBAR USERNAME =====
+const email = localStorage.getItem("userEmail");
+if (email) {
+  const name = email.split("@")[0];
+  document.getElementById("userName").innerText =
+    name.charAt(0).toUpperCase() + name.slice(1);
+} else {
+  document.getElementById("userName").innerText = "Guest";
+}
+
+// ===== NAVBAR DROPDOWN =====
+function toggleMenu(){
+  const menu=document.getElementById("menu");
+  menu.style.display=menu.style.display==="block"?"none":"block";
+}
+
+// ===== LOGIN CHECK =====
+if (localStorage.getItem("loggedIn") !== "true") {
+  window.location.href = "index.html";
+}
+
+// ===== LOGOUT =====
+function logout(){
+  localStorage.clear();
+  window.location.href="login.html";
+}
+
+// ===== GEOCODE FUNCTION =====
+async function geocode(place){
+  const res=await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(place + ", Maharashtra")}`
+  );
+  const data=await res.json();
+  if(!data.length) return null;
+  return {lat:+data[0].lat,lng:+data[0].lon};
+}
+
+// ===== BOOK RIDE FUNCTION =====
+
+async function bookRide() {
+  const pickup = document.getElementById("pickup").value.trim();
+  const drop = document.getElementById("drop").value.trim();
+
+  if (!pickup || !drop) {
+    alert("Enter pickup & drop");
+    return;
+  }
+
+  // 1️⃣ Geocode
+  const p = await geocode(pickup);
+  const d = await geocode(drop);
+
+  if (!p || !d) {
+    alert("Invalid location");
+    return;
+  }
+
+  // 2️⃣ Distance calculation
+  const res = await fetch(
+    `https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=false`
+  );
+  const data = await res.json();
+
+  const distance = (data.routes[0].distance / 1000).toFixed(2);
+  const fare = Math.round(distance * 25);
+
+  // 3️⃣ Save for price.html
+  localStorage.setItem("pickup", pickup);
+  localStorage.setItem("drop", drop);
+  localStorage.setItem("distance", distance);
+  localStorage.setItem("fare", fare);
+
+  // 4️⃣ 🔥 BACKEND: SAVE RIDE (ONLY ONCE)
+  await fetch("https://ride2-6.onrender.com/api/rides/book-ride", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId: localStorage.getItem("userId"),
+      pickup,
+      drop,
+      distance,
+      fare
+    })
+  });
+
+  // 5️⃣ Redirect
+  window.location.href = "price.html";
+}
+
+
+</script>
+
+</body>
+</html>

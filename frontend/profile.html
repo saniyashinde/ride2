@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Profile | MoveMaster</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+
+body{
+  font-family:'Baloo 2', cursive;
+  margin:0;
+  padding-top:70px;
+  min-height:100vh;
+  background:linear-gradient(135deg,#fdfbfb,#ebedee);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* NAVBAR */
+.navbar{
+  width:100%;
+  background:#fff;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 30px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.15);
+  position:fixed;
+  top:0;
+  z-index:10;
+}
+
+.nav-left{
+  font-size:20px;
+  font-weight:600;
+  color:#0aa2e6;
+}
+
+.nav-center a{
+  margin:0 15px;
+  text-decoration:none;
+  color:#333;
+}
+.nav-center a:hover{color:#0aa2e6}
+
+.nav-right{
+  background:#0aa2e6;
+  color:#fff;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:14px;
+}
+
+/* CARD */
+.card{
+  background:#fff;
+  width:420px;
+  border-radius:20px;
+  padding:30px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+  text-align:center;
+  margin-top:60px;
+  animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.profile-pic{
+  width:100px;
+  height:100px;
+  border-radius:50%;
+  background:#0aa2e6;
+  color:#27c6fb;
+  font-size:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 15px;
+}
+
+h2{margin:0;color:#0aa2e6}
+
+.info{
+  text-align:left;
+  margin-top:20px;
+}
+.info p{
+  margin:8px 0;
+  color:#555;
+}
+.info span{
+  font-weight:bold;
+  color:#0aa2e6;
+}
+
+button{
+  margin-top:20px;
+  padding:10px 20px;
+  background:#0aa2e6;
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+}
+button:hover{background:#088ac7}
+
+.form-group{margin:10px 0}
+input{
+  width:100%;
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+.gender{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-left">🛺 MoveMaster</div>
+
+  <div class="nav-center">
+    <a href="booking.html">🏠 Home</a>
+    <a href="services.html">🛺 Services</a>
+    <a href="activity.html">📊 Activity</a>
+    <a href="help.html">🆘 Help</a>
+  </div>
+
+  <!-- 🔥 USER NAME HERE -->
+  <div class="nav-right" id="navUser">-</div>
+</div>
+
+<!-- PROFILE CARD -->
+<div class="card">
+  <div class="profile-pic">👤</div>
+  <h2 id="userName">-</h2>
+
+  <div class="info">
+    <p>Email: <span id="email">-</span></p>
+    <p>Gender: <span id="gender">-</span></p>
+    <p>Age: <span id="age">-</span></p>
+    <p>Phone: <span id="phone">-</span></p>
+  </div>
+
+  <button onclick="openForm()">✏️ Add / Edit Profile</button>
+
+  <div id="formBox" style="display:none;margin-top:20px;">
+    <div class="form-group">
+      <input id="nameInput" placeholder="Enter Name">
+    </div>
+    <div class="form-group">
+      <input id="ageInput" type="number" placeholder="Enter Age">
+    </div>
+    <div class="form-group gender">
+      <label><input type="radio" name="gender" value="Male"> Male</label>
+      <label><input type="radio" name="gender" value="Female"> Female</label>
+      <label><input type="radio" name="gender" value="Other"> Other</label>
+    </div>
+    <div class="form-group">
+      <input id="phoneInput" placeholder="Enter Phone">
+    </div>
+    <button onclick="saveProfile()">💾 Save</button>
+  </div>
+</div>
+<script>
+const userName = document.getElementById("userName");
+const emailSpan = document.getElementById("email");
+const genderSpan = document.getElementById("gender");
+const ageSpan = document.getElementById("age");
+const phoneSpan = document.getElementById("phone");
+const navUser = document.getElementById("navUser");
+
+const nameInput = document.getElementById("nameInput");
+const ageInput = document.getElementById("ageInput");
+const phoneInput = document.getElementById("phoneInput");
+const formBox = document.getElementById("formBox");
+
+/* 🔐 LOGIN CHECK (FIXED) */
+const googleUser = JSON.parse(localStorage.getItem("loggedInUser"));
+const normalEmail = localStorage.getItem("loggedInEmail");
+
+const currentEmail = googleUser?.email || normalEmail;
+
+if (!currentEmail) {
+  alert("Please login first");
+  window.location.href = "signup.html";
+}
+
+/* LOAD PROFILE */
+function loadProfile(){
+  const profile = JSON.parse(localStorage.getItem("profile_" + currentEmail)) || {};
+
+  const displayName =
+    profile.name ||
+    googleUser?.name ||
+    currentEmail;
+
+  userName.textContent = displayName;
+  emailSpan.textContent = currentEmail;
+  genderSpan.textContent = profile.gender || "-";
+  ageSpan.textContent = profile.age || "-";
+  phoneSpan.textContent = profile.phone || "-";
+}
+
+/* LOAD NAVBAR USER */
+function loadNavbarUser(){
+  const profile = JSON.parse(localStorage.getItem("profile_" + currentEmail)) || {};
+  const displayName =
+    profile.name ||
+    googleUser?.name ||
+    currentEmail;
+
+  navUser.textContent = displayName;
+}
+
+/* OPEN FORM */
+function openForm(){
+  formBox.style.display = "block";
+  const profile = JSON.parse(localStorage.getItem("profile_" + currentEmail)) || {};
+
+  nameInput.value = profile.name || googleUser?.name || "";
+  ageInput.value = profile.age || "";
+  phoneInput.value = profile.phone || "";
+
+  if(profile.gender){
+    document.querySelector(`input[value="${profile.gender}"]`).checked = true;
+  }
+}
+
+/* SAVE PROFILE */
+function saveProfile(){
+  const genderVal = document.querySelector('input[name="gender"]:checked');
+
+  const profileData = {
+    name: nameInput.value.trim(),
+    age: ageInput.value.trim(),
+    phone: phoneInput.value.trim(),
+    gender: genderVal ? genderVal.value : ""
+  };
+
+  localStorage.setItem("profile_" + currentEmail, JSON.stringify(profileData));
+
+  loadProfile();
+  loadNavbarUser();
+  formBox.style.display = "none";
+}
+
+/* PAGE LOAD */
+window.onload = () => {
+  loadProfile();
+  loadNavbarUser();
+};
+</script>
+
+</body>
+</html>

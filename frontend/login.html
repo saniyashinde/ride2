@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Create Account | MoveMaster</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+
+body{
+  height:100vh;
+  margin:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:'Baloo 2', cursive;
+  background:linear-gradient(135deg,#0aa2e6,#42d1f5);
+}
+
+.signup-box{
+  background:#fff;
+  padding:32px;
+  width:350px;
+  border-radius:20px;
+  box-shadow:0 18px 35px rgba(0,0,0,0.25);
+  text-align:center;
+  animation:pop 0.6s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(0.9);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+.logo{
+  font-size:42px;
+  margin-bottom:8px;
+}
+
+.signup-box h2{
+  margin:10px 0 5px;
+  color:#0aa2e6;
+}
+
+.sub{
+  font-size:14px;
+  color:#777;
+  margin-bottom:18px;
+}
+
+.signup-box input{
+  width:100%;
+  padding:10px;
+  margin-bottom:6px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  outline:none;
+  box-sizing:border-box;
+}
+
+.signup-box input:focus{
+  border-color:#0aa2e6;
+}
+
+.signup-box button{
+  width:100%;
+  padding:11px;
+  background:#0aa2e6;
+  border:none;
+  color:#fff;
+  font-size:16px;
+  border-radius:12px;
+  cursor:pointer;
+  margin-top:10px;
+}
+
+.signup-box button:hover{
+  background:#088ac7;
+}
+
+.msg{
+  font-size:14px;
+  min-height:18px;
+}
+
+.error{color:red}
+.valid{color:green}
+
+.login-link{
+  margin-top:15px;
+  font-size:14px;
+}
+.login-link a{
+  color:#0aa2e6;
+  text-decoration:none;
+  font-weight:600;
+}
+.login-link a:hover{text-decoration:underline}
+</style>
+</head>
+
+<body>
+
+<div class="signup-box">
+  <div class="logo">🛺</div>
+  <h2>Create Account</h2>
+  <div class="sub">Your everyday auto ride partner</div>
+
+  <input id="email" placeholder="Gmail address">
+  <p id="email-msg" class="msg"></p>
+
+  <input id="password" type="password" placeholder="Password">
+  <p id="password-msg" class="msg"></p>
+
+  <button onclick="signup()">Create Account</button>
+  <p id="msg" class="msg"></p>
+
+  <div class="login-link">
+    Already have an account?
+    <a href="login.html">Login</a>
+  </div>
+</div>
+
+<script>
+const savedEmail = localStorage.getItem("deviceUserEmail");
+
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const emailMsg = document.getElementById("email-msg");
+const passwordMsg = document.getElementById("password-msg");
+const msg = document.getElementById("msg");
+
+const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+const passwordPattern = /^.{8,}$/; // just minimum 8 chars, backend accepts
+
+// Show returning user UI
+if (savedEmail) {
+  passwordInput.style.display = "none";
+  passwordMsg.style.display = "none";
+
+  msg.innerText = "Welcome back 👋 Enter your email to continue";
+  msg.className = "msg valid";
+}
+
+// LIVE VALIDATION
+emailInput.addEventListener("input", () => {
+  if (!emailInput.value) {
+    emailMsg.innerText = "";
+  } else if (!emailPattern.test(emailInput.value)) {
+    emailMsg.innerText = "❌ Enter valid Gmail";
+    emailMsg.className = "msg error";
+  } else {
+    emailMsg.innerText = "✅ Valid Gmail";
+    emailMsg.className = "msg valid";
+  }
+});
+
+passwordInput.addEventListener("input", () => {
+  if (!passwordInput.value) {
+    passwordMsg.innerText = "";
+  } else if (!passwordPattern.test(passwordInput.value)) {
+    passwordMsg.innerText = "❌ Min 8 characters";
+    passwordMsg.className = "msg error";
+  } else {
+    passwordMsg.innerText = "✅ Strong password";
+    passwordMsg.className = "msg valid";
+  }
+});
+
+// SIGNUP FUNCTION
+function signup() {
+  msg.innerText = "";
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
+
+  // Returning user
+  if (savedEmail) {
+    if (email === savedEmail) {
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("loggedInEmail", email);
+      window.location.href = "booking.html";
+    } else {
+      msg.innerText = "❌ This email is not registered on this device";
+      msg.className = "msg error";
+    }
+    return;
+  }
+
+  // New user validation
+  if (!emailPattern.test(email)) {
+    msg.innerText = "❌ Invalid Gmail address";
+    msg.className = "msg error";
+    return;
+  }
+
+  if (!passwordPattern.test(password)) {
+    msg.innerText = "❌ Weak password (min 8 chars)";
+    msg.className = "msg error";
+    return;
+  }
+
+  // Signup fetch call
+  fetch("https://ride2-6.onrender.com/api/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.user) {
+      // Save device info
+      localStorage.setItem("deviceUserEmail", email);
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("loggedInEmail", email);
+      localStorage.setItem("userId", data.user._id);
+
+      window.location.href = "booking.html";
+    } else {
+      msg.innerText = data.msg || "Server error";
+      msg.className = "msg error";
+    }
+  })
+  .catch(() => {
+    msg.innerText = "Server error. Try again.";
+    msg.className = "msg error";
+  });
+}
+</script>
+
+</body>
+</html>

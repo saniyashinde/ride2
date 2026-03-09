@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MoveMaster Driver Dashboard</title>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"/>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+<style>
+body {
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(135deg,#42d1f5,#0aa2e6);
+    color:#fff;
+}
+header {
+    background:#088ac7;
+    padding:20px;
+    text-align:center;
+}
+.container {
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    padding:20px;
+}
+.card {
+    background:#fff;
+    color:#333;
+    border-radius:12px;
+    padding:20px;
+    flex:1 1 320px;
+}
+button {
+    background:#0aa2e6;
+    border:none;
+    color:#fff;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+}
+button:hover {
+    transform:scale(1.05);
+}
+#map {
+    height:320px;
+    border-radius:10px;
+}
+.rideRequestDiv {
+    background:#f4f4f4;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:10px;
+}
+#otpBox {
+    display:none;
+    margin-top:15px;
+    background:#eef6ff;
+    padding:12px;
+    border-radius:8px;
+}
+input {
+    width:100%;
+    padding:8px;
+    margin-bottom:5px;
+}
+.status {
+    padding:4px 12px;
+    border-radius:20px;
+    font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🛺 MoveMaster Driver Dashboard🛺</h1>
+    <p>Welcome, <b id="driverNameDisplay"></b></p>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h3>Driver Profile</h3>
+        <p>Total Rides: <b id="totalRides">0</b></p>
+        <p>Ride Status:
+            <span id="rideStatus" class="status" style="background:#ccc">IDLE</span>
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>🛺Pending Ride Requests🛺</h3>
+        <div id="rideRequests">Loading...</div>
+    </div>
+
+    
+
+    <div class="card">
+        <h3>Current Ride / OTP</h3>
+        <div id="otpBox">
+            <h4>🔐 Pickup OTP Verification</h4>
+            <input id="otpInput" placeholder="Enter User OTP">
+            <p id="otpMsg"></p>
+            <button onclick="verifyOTP()">Verify OTP</button>
+        </div>
+    </div>
+
+    <div class="card" style="flex-basis:100%">
+        <h3>Ride Map</h3>
+        <div id="map"></div>
+    </div>
+
+    <div class="card">
+        <h3>Complete Ride</h3>
+        <button onclick="completeRide('CASH')">Cash</button>
+        <button onclick="completeRide('UPI')">UPI</button>
+    </div>
+
+</div>
+
+<script>
+// ===============================
+// DRIVER LOGIN CHECK
+// ===============================
+const driverId = localStorage.getItem("driverId");
+const driverName = localStorage.getItem("driverName");
+
+if (!driverId) {
+  alert("Please login first");
+  window.location.href = "driverlogin.html";
+}
+
+document.getElementById("driverNameDisplay").innerText = driverName || "Driver";
+
+// ===============================
+// CURRENT RIDE TRACKER
+// ===============================
+let currentRide = JSON.parse(localStorage.getItem("currentRide")) || null;
+
+// ===============================
+// FETCH PENDING RIDES
+// ===============================
+// ===============================
+// FETCH ONLY LAST ADDED PENDING RIDE
+// ===============================
+async function fetchPendingRides() {
+  try {
+    const res = await fetch(`https://ride2-6.onrender.com/api/rides/pending`);
+    const rides = await res.json();
+    const container = document.getElementById("rideRequests");
+    container.innerHTML = "";
+
+    if (!rides.length) {
+      container.innerHTML = "No new ride requests 🚫";
+      return;
+    }
+
+    // Take only the last added ride
+    const ride = rides[rides.length - 1];
+
+    container.innerHTML = `
+      <div class="rideRequestDiv">
+        <p><b>User Email:</b> ${ride.userId?.name || "Unknown"}</p>
+        <p><b>Pickup:</b> ${ride.pickup}</p>
+        <p><b>Drop:</b> ${ride.drop}</p>
+        <p><b>Fare:</b> ₹${ride.fare}</p>
+        <button onclick="acceptRide('${ride._id}')">✅ Accept Ride</button>
+      </div>
+    `;
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "Error fetching rides";
+  }
+}
+
+// ===============================
+// ACCEPT RIDE
+// ===============================
+async function acceptRide(rideId) {
+  try {
+    const res = await fetch("https://ride2-6.onrender.com/api/rides/accept-ride", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ rideId, driverId })
+    });
+
+    const data = await res.json();
+    currentRide = data.ride;
+
+    // Show OTP box
+    document.getElementById("otpBox").style.display = "block";
+    document.getElementById("rideStatus").innerText = "accepted";
+    document.getElementById("rideStatus").style.background = "orange";
+
+    // Update localStorage
+    localStorage.setItem("currentRide", JSON.stringify({...currentRide, status: "accepted"}));
+
+    fetchPendingRides();
+    fetchPreviousRides();
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ===============================
+// VERIFY OTP
+// ===============================
+function verifyOTP() {
+  const enteredOtp = document.getElementById("otpInput").value.trim();
+  let currentRide = JSON.parse(localStorage.getItem("currentRide"));
+
+  if (!currentRide) {
+    document.getElementById("otpMsg").innerText = "❌ No ride selected. Please wait for driver to accept your ride.";
+    return;
+  }
+
+  if (!enteredOtp) {
+    document.getElementById("otpMsg").innerText = "❌ Please enter OTP.";
+    return;
+  }
+
+  if (!currentRide.otp) {
+    document.getElementById("otpMsg").innerText = "❌ OTP not set for this ride. Please contact support.";
+    return;
+  }
+
+  // Simple local check
+  if (enteredOtp === currentRide.otp) {
+    document.getElementById("otpMsg").innerText = "✅ OTP Verified. Ride started!";
+    document.getElementById("rideStatus").innerText = "started";
+    document.getElementById("rideStatus").style.background = "green";
+    document.getElementById("otpBox").style.display = "none";
+
+    currentRide.status = "started";
+    currentRide.otpVerified = true;
+    localStorage.setItem("currentRide", JSON.stringify(currentRide));
+
+  } else {
+    document.getElementById("otpMsg").innerText = "❌ OTP is incorrect. Please try again.";
+  }
+}
+
+// ===============================
+// COMPLETE RIDE
+// ===============================
+// ===============================
+// COMPLETE RIDE (Local)
+// ===============================
+async function completeRide(paymentMode) {
+  let currentRide = JSON.parse(localStorage.getItem("currentRide"));
+  if (!currentRide) return alert("❌ No ride active");
+
+  try {
+    const res = await fetch("https://ride2-6.onrender.com/api/rides/complete-ride", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        rideId: currentRide._id,
+        driverId: driverId,
+        paymentMode
+      })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert(`🎉 Ride Completed!\nPayment Mode: ${paymentMode}`);
+
+      // Remove current ride
+      localStorage.removeItem("currentRide");
+
+      // Update UI
+      document.getElementById("rideStatus").innerText = "IDLE";
+      document.getElementById("rideStatus").style.background = "#ccc";
+
+      // Update driver total rides (optional)
+      let driverData = JSON.parse(localStorage.getItem("driverData")) || { totalRides: 0 };
+      driverData.totalRides += 1;
+      localStorage.setItem("driverData", JSON.stringify(driverData));
+      document.getElementById("totalRides").innerText = driverData.totalRides;
+
+      fetchPendingRides();  // refresh pending rides
+    } else {
+      alert("Error completing ride: " + data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Server error while completing ride");
+  }
+}
+// ===============================
+// LEAFLET MAP INIT
+// ===============================
+const map = L.map("map").setView([19.0760, 72.8777], 12); // Mumbai default
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap contributors'
+}).addTo(map);
+
+async function loadDriverLocations() {
+  try {
+    const res = await fetch("https://ride2-6.onrender.com/api/drivers/locations");
+    const drivers = await res.json();
+
+    drivers.forEach(d => {
+      L.marker([d.lat, d.lng])
+        .addTo(map)
+        .bindPopup(`<b>${d.name}</b><br>Available: ${d.available}`);
+    });
+  } catch(err) {
+    console.error("Map error:", err);
+  }
+}
+
+// Fetch initial rides and map
+fetchPendingRides();
+fetchPreviousRides();
+loadDriverLocations();
+</script>
+
+</body>
+</html>
