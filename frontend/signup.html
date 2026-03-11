@@ -84,8 +84,8 @@ const msg = document.getElementById("msg");
 
 // Detect backend URL (local or deployed)
 const API_URL = location.hostname === "localhost"
-  ? "http://localhost:3000/api/users"
-  : "https://ride2-6.onrender.com/api/users";
+  ? "http://localhost:5000/api/users"
+  : "http://localhost:5000/api/users";
 
 /* ---------- CREATE ACCOUNT ---------- */
 function showCreate() {
@@ -143,8 +143,51 @@ function showContinue() {
   formArea.appendChild(passwordInput);
   formArea.appendChild(btn);
 }
+/* ---------- CREATE ACCOUNT ---------- */
+async function createAccount(e) {
+  if (e) e.preventDefault();
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!name || !email || !password) {
+    msg.innerText = "❌ All fields are required";
+    msg.className = "msg error";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ name, email, password })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      localStorage.setItem("userId", data.user._id);
+      localStorage.setItem("loggedInEmail", data.user.email);
+      localStorage.setItem("userEmail", data.user.email);
+      localStorage.setItem("loggedIn", "true");
+      msg.innerText = "✅ Account created successfully!";
+      msg.className = "msg valid";
+      setTimeout(() => window.location.href = "booking.html", 1000);
+    } else {
+      msg.innerText = `❌ ${data.msg || "Error creating account"}`;
+      msg.className = "msg error";
+    }
+  } catch (err) {
+    console.error("Signup Fetch error:", err);
+    msg.innerText = "❌ Network error (Server offline or CORS)";
+    msg.className = "msg error";
+  }
+}
+
 /* ---------- NORMAL LOGIN ---------- */
-async function continueLogin() {
+async function continueLogin(e) {
+  if (e) e.preventDefault();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
@@ -167,6 +210,8 @@ async function continueLogin() {
     if (res.ok) {
       localStorage.setItem("userId", data.user._id);
       localStorage.setItem("loggedInEmail", data.user.email);
+      localStorage.setItem("userEmail", data.user.email);
+      localStorage.setItem("loggedIn", "true");
       msg.innerText = "✅ Login successful!";
       msg.className = "msg valid";
       setTimeout(() => window.location.href = "booking.html", 1000);
@@ -175,7 +220,8 @@ async function continueLogin() {
       msg.className = "msg error";
     }
   } catch (err) {
-    msg.innerText = "❌ Server error";
+    console.error("Login Fetch error:", err);
+    msg.innerText = "❌ Network error (Server offline or CORS)";
     msg.className = "msg error";
   }
 }

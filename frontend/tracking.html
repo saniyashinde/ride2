@@ -11,7 +11,7 @@
   <button onclick="endRide()">End Ride</button>
 
   <script>
-    const socket = io("https://ride2-6.onrender.com"); // <-- Make sure server runs on 8080
+    const socket = io("http://localhost:5000"); // <-- Make sure server runs on 8080
 
     const rideId = localStorage.getItem("rideId");
     if (!rideId) {

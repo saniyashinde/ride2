@@ -1,343 +1,539 @@
-<!-- =============================== -->
-<!-- OWNER DASHBOARD -->
-<!-- =============================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>MoveMaster Owner Dashboard</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body { margin:0; font-family: Arial,sans-serif; background:linear-gradient(135deg,#0aa2e6,#42d1f5); }
-header { background:#0aa2e6; color:#fff; padding:20px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.2); }
-.container { display:flex; flex-wrap:wrap; padding:20px; gap:20px; }
-.card { background:#fff; border-radius:10px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1); flex:1 1 350px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-.card:hover { transform: translateY(-5px); box-shadow:0 10px 25px rgba(0,0,0,0.2); }
-.card h3 { margin-top:0; color:#0aa2e6; }
-#map { height:300px; border-radius:10px; margin-top:10px; }
-.chart-container { height:250px; }
-input, button { padding:8px; margin:5px 0; }
-button { background:#0aa2e6; color:white; border:none; cursor:pointer; border-radius:6px; padding:8px 12px; }
-button:hover { opacity:0.9; }
-table { width:100%; border-collapse:collapse; margin-top:10px; }
-table, th, td { border:1px solid #ccc; }
-th, td { padding:8px; text-align:center; }
-.error-msg { color:red; margin-top:5px; font-weight:bold; }
-.success-msg { color:green; margin-top:5px; font-weight:bold; }
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&display=swap');
+
+:root {
+  --primary: #0aa2e6;
+  --primary-d: #088ac7;
+  --green: #22cc88;
+  --red: #ff4d4d;
+  --orange: #ff8c00;
+  --bg: #e8f4fb;
+  --card: #ffffff;
+  --text: #1a2a3a;
+  --muted: #6c7a89;
+}
+
+* { box-sizing:border-box; margin:0; padding:0; font-family:'Baloo 2', cursive; }
+
+body { background:var(--bg); min-height:100vh; }
+
+/* ===== HEADER ===== */
+header {
+  background: linear-gradient(135deg, #0aa2e6, #42d1f5);
+  color:#fff; padding:22px 30px;
+  text-align:center;
+  box-shadow:0 4px 20px rgba(10,162,230,0.3);
+}
+header h1 { font-size:26px; font-weight:700; }
+header p  { font-size:13px; opacity:0.85; margin-top:4px; }
+
+/* ===== STAT CARDS ROW ===== */
+.stats-row {
+  display:flex; flex-wrap:wrap; gap:16px;
+  padding:20px 20px 0;
+}
+.stat-card {
+  flex:1 1 150px;
+  background:var(--card);
+  border-radius:14px;
+  padding:18px 20px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.07);
+  border-left:5px solid var(--primary);
+  transition:transform 0.2s;
+}
+.stat-card:hover { transform:translateY(-3px); }
+.stat-card.green  { border-left-color:var(--green); }
+.stat-card.orange { border-left-color:var(--orange); }
+.stat-card.red    { border-left-color:var(--red); }
+.stat-card .label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; }
+.stat-card .value { font-size:32px; font-weight:700; color:var(--text); margin-top:4px; }
+
+/* ===== MAIN GRID ===== */
+.container { display:flex; flex-wrap:wrap; gap:20px; padding:20px; }
+
+.card {
+  background:var(--card);
+  border-radius:16px;
+  padding:22px;
+  flex:1 1 360px;
+  box-shadow:0 4px 18px rgba(0,0,0,0.08);
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+.card:hover { transform:translateY(-3px); box-shadow:0 8px 28px rgba(0,0,0,0.12); }
+.card h3 {
+  margin:0 0 16px;
+  color:var(--primary); font-size:17px;
+  border-bottom:2px solid #e8f4fb;
+  padding-bottom:10px;
+}
+
+/* ===== INPUTS ===== */
+.input-row { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+input {
+  padding:9px 12px; border:2px solid #dce8f0; border-radius:9px;
+  font-size:14px; font-family:'Baloo 2', cursive; flex:1; min-width:100px;
+  transition:border 0.2s;
+}
+input:focus { outline:none; border-color:var(--primary); }
+
+/* ===== BUTTONS ===== */
+.btn {
+  padding:9px 16px; border:none; border-radius:9px;
+  font-size:14px; font-weight:700; font-family:'Baloo 2', cursive;
+  cursor:pointer; transition:all 0.2s;
+}
+.btn-primary { background:var(--primary); color:#fff; }
+.btn-primary:hover { background:var(--primary-d); }
+.btn-block   { background:#ff4d4d; color:#fff; font-size:12px; padding:6px 12px; }
+.btn-unblock { background:var(--green); color:#fff; font-size:12px; padding:6px 12px; }
+
+/* ===== TABLES ===== */
+table { width:100%; border-collapse:collapse; margin-top:6px; font-size:13.5px; }
+th {
+  background:#f0f8ff; color:var(--primary);
+  padding:10px 8px; text-align:center;
+  font-weight:700; border-bottom:2px solid #dce8f0;
+}
+td { padding:9px 8px; text-align:center; border-bottom:1px solid #f0f0f0; color:var(--text); }
+tr:hover td { background:#f8fcff; }
+
+.badge {
+  display:inline-block; padding:3px 10px; border-radius:20px;
+  font-size:12px; font-weight:600;
+}
+.badge-green  { background:#d4f5e9; color:#1aaa70; }
+.badge-red    { background:#ffe0e0; color:#cc2200; }
+.badge-orange { background:#fff0d4; color:#cc6600; }
+.badge-blue   { background:#d4eeff; color:#0066aa; }
+
+/* ===== MAP ===== */
+#map { height:380px; border-radius:12px; margin-top:6px; z-index:1; }
+
+/* ===== MESSAGES ===== */
+.success-msg { color:var(--green); font-weight:600; font-size:13px; margin-top:6px; }
+.error-msg   { color:var(--red);   font-weight:600; font-size:13px; margin-top:6px; }
+
+/* ===== REFRESH BTN ===== */
+.refresh-btn {
+  float:right; padding:4px 12px;
+  background:#e8f4fb; color:var(--primary);
+  border:1px solid var(--primary); border-radius:20px;
+  font-size:12px; cursor:pointer; transition:all 0.2s;
+}
+.refresh-btn:hover { background:var(--primary); color:#fff; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🛺MoveMaster Owner Dashboard🛺</h1>
+  <h1>🛺 MoveMaster Owner Dashboard 🛺</h1>
+  <p>Live overview of drivers, users, and rides</p>
 </header>
+
+<!-- ===== STAT CARDS ===== -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="label">Total Users</div>
+    <div class="value" id="statUsers">—</div>
+  </div>
+  <div class="stat-card green">
+    <div class="label">Total Drivers</div>
+    <div class="value" id="statDrivers">—</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="label">Rides Completed</div>
+    <div class="value" id="statCompleted">—</div>
+  </div>
+  <div class="stat-card red">
+    <div class="label">Rides Cancelled</div>
+    <div class="value" id="statCancelled">—</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">Pending Rides</div>
+    <div class="value" id="statPending">—</div>
+  </div>
+</div>
 
 <div class="container">
 
-  <!-- Driver Management -->
+  <!-- ===== DRIVER MANAGEMENT ===== -->
   <div class="card">
-    <h3>Driver Management</h3>
-    <input type="text" id="driverName" placeholder="Driver Name">
-    <input type="text" id="driverContact" placeholder="Driver Contact">
-    <button type="button" onclick="addDriver()">Add Driver</button>
-    <p id="driverMsg" class="error-msg"></p>
+    <h3>🚗 Driver Management <button class="refresh-btn" onclick="loadDrivers()">↻ Refresh</button></h3>
+    <div class="input-row">
+      <input type="text" id="driverName" placeholder="Driver Name">
+      <input type="text" id="driverContact" placeholder="Driver Contact">
+      <button class="btn btn-primary" onclick="addDriver()">+ Add Driver</button>
+    </div>
+    <p id="driverMsg"></p>
     <table id="driversTable">
       <tr>
-        <th>Name</th>
-        <th>Contact</th>
-        <th>Rides Completed</th>
-        <th>Rating</th>
-        <th>Status</th>
-        <th>Action</th>
+        <th>Name</th><th>Contact</th><th>Rides Done</th>
+        <th>Cancelled</th><th>Rating</th><th>Status</th><th>Action</th>
       </tr>
     </table>
   </div>
 
-  <!-- Users & Bookings -->
+  <!-- ===== USER RIDE SUMMARY ===== -->
   <div class="card">
-    <h3>User Ride Summary</h3>
+    <h3>👥 User Ride Summary <button class="refresh-btn" onclick="loadUsers()">↻ Refresh</button></h3>
     <table id="usersTable">
       <tr>
-        <th>Email</th>
-        <th>Total Rides</th>
-        <th>Completed</th>
-        <th>Cancelled</th>
-        <th>Action</th>
+        <th>Name</th><th>Email</th><th>Total</th>
+        <th>Completed</th><th>Cancelled</th><th>Action</th>
       </tr>
     </table>
   </div>
 
-  <!-- Active Rides Map -->
+  <!-- ===== LIVE MAP ===== -->
   <div class="card" style="flex-basis:100%">
-    <h3>Active Rides Map</h3>
+    <h3>📍 Live Driver Location Map <button class="refresh-btn" onclick="loadMap()">↻ Refresh</button></h3>
     <div id="map"></div>
     <p id="mapError" class="error-msg"></p>
   </div>
 
-  <!-- Signup & Booking Analytics -->
+  <!-- ===== ALL RIDES TABLE ===== -->
   <div class="card" style="flex-basis:100%">
-    <h3>Signup & Booking Analytics</h3>
-    <canvas id="signupChart" class="chart-container"></canvas>
+    <h3>📋 All Rides History <button class="refresh-btn" onclick="loadAllRides()">↻ Refresh</button></h3>
+    <table id="ridesTable">
+      <tr>
+        <th>User</th><th>Driver</th><th>Pickup</th><th>Drop</th>
+        <th>Fare</th><th>Status</th><th>Payment</th><th>Time</th>
+      </tr>
+    </table>
   </div>
 
 </div>
 
 <script>
-const API = "https://ride2-6.onrender.com/api/owner";
+const API = "http://localhost:5000";
 
-// ===============================
-// ADD DRIVER
-// ===============================
-async function addDriver() {
-  const name = document.getElementById("driverName").value.trim();
-  const contact = document.getElementById("driverContact").value.trim();
-  const msg = document.getElementById("driverMsg");
-  msg.className = "error-msg"; 
-  msg.innerText = "";
-
-  if (!name || !contact) {
-    msg.innerText = "Enter all fields!";
-    return;
+// ===== SAFE FETCH =====
+async function safeFetch(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return await res.json();
+  } catch (e) {
+    console.warn("Fetch failed:", url, e.message);
+    return null;
   }
+}
+
+// ===== BLOCK HELPERS =====
+function isDriverBlocked(name) {
+  return (JSON.parse(localStorage.getItem("blockedDrivers") || "[]")).includes(name);
+}
+function isUserBlocked(email) {
+  return (JSON.parse(localStorage.getItem("blockedUsers") || "[]")).includes(email);
+}
+function toggleDriverBlock(name) {
+  const list = JSON.parse(localStorage.getItem("blockedDrivers") || "[]");
+  const i = list.indexOf(name);
+  if (i > -1) list.splice(i, 1); else list.push(name);
+  localStorage.setItem("blockedDrivers", JSON.stringify(list));
+  loadDrivers();
+}
+function toggleUserBlock(email) {
+  const list = JSON.parse(localStorage.getItem("blockedUsers") || "[]");
+  const i = list.indexOf(email);
+  if (i > -1) list.splice(i, 1); else list.push(email);
+  localStorage.setItem("blockedUsers", JSON.stringify(list));
+  loadUsers();
+}
+
+// ===== ADD DRIVER =====
+async function addDriver() {
+  const name    = document.getElementById("driverName").value.trim();
+  const contact = document.getElementById("driverContact").value.trim();
+  const msg     = document.getElementById("driverMsg");
+  msg.className = "error-msg";
+
+  if (!name || !contact) { msg.innerText = "⚠️ Enter name and contact!"; return; }
 
   try {
-    const res = await fetch(`${API}/drivers`, {
+    const res  = await fetch(`${API}/api/owner/drivers`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, contact })
     });
     const data = await res.json();
-    if (!res.ok) {
-      msg.innerText = data.message || "Server error!";
-      return;
-    }
+    if (!res.ok) { msg.innerText = data.message || "Server error!"; return; }
 
     msg.className = "success-msg";
-    msg.innerText = "Driver added successfully ✅";
-    document.getElementById("driverName").value = "";
+    msg.innerText = "✅ Driver added!";
+    document.getElementById("driverName").value    = "";
     document.getElementById("driverContact").value = "";
     loadDrivers();
   } catch (err) {
-    console.error(err);
-    msg.innerText = `Error connecting to server: ${err.message}`;
+    msg.innerText = "❌ Server error: " + err.message;
   }
 }
 
-// ===============================
-// BLOCK/UNBLOCK DRIVER
-// ===============================
-function toggleDriverBlock(driverName) {
-  const blockedDrivers = JSON.parse(localStorage.getItem("blockedDrivers") || "[]");
-  const index = blockedDrivers.indexOf(driverName);
-  if(index > -1) blockedDrivers.splice(index,1);
-  else blockedDrivers.push(driverName);
-  localStorage.setItem("blockedDrivers", JSON.stringify(blockedDrivers));
-  loadDrivers();
-}
-
-// ===============================
-// BLOCK/UNBLOCK USER
-// ===============================
-function toggleUserBlock(email) {
-  const blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]");
-  const index = blockedUsers.indexOf(email);
-  if(index > -1) blockedUsers.splice(index,1);
-  else blockedUsers.push(email);
-  localStorage.setItem("blockedUsers", JSON.stringify(blockedUsers));
-  loadUsers();
-}
-
-// ===============================
-// LOAD DRIVERS
-// ===============================
+// ===== LOAD DRIVERS =====
+// ✅ Reads from /api/driver/all (driverRoutes.js → Driver model)
 async function loadDrivers() {
   const table = document.getElementById("driversTable");
-  table.innerHTML = `
-    <tr>
-      <th>Name</th>
-      <th>Contact</th>
-      <th>Rides Completed</th>
-      <th>Rating</th>
-      <th>Status</th>
-      <th>Action</th>
-    </tr>
-  `;
+  table.innerHTML = `<tr>
+    <th>Name</th><th>Contact</th><th>Rides Done</th>
+    <th>Cancelled</th><th>Rating</th><th>Status</th><th>Action</th>
+  </tr>`;
 
-  try {
-    const res = await fetch("https://ride2-6.onrender.com/api/driver/all");
-    const drivers = await res.json();
-    const blockedDrivers = JSON.parse(localStorage.getItem("blockedDrivers") || "[]");
+  const drivers = await safeFetch(`${API}/api/driver/all`);
 
-    if (!drivers || drivers.length === 0) {
-      const row = table.insertRow();
-      row.insertCell(0).innerText = "No Drivers";
-      row.insertCell(1).innerText = "-";
-      row.insertCell(2).innerText = "0";
-      row.insertCell(3).innerText = "-";
-      row.insertCell(4).innerText = "-";
-      row.insertCell(5).innerText = "-";
-      return;
-    }
-
-    drivers.forEach(d => {
-      const row = table.insertRow();
-      row.insertCell(0).innerText = d.name;
-      row.insertCell(1).innerText = d.contact || "-";
-
-      const historyKey = "rideHistory_" + d.name;
-      const localRides = JSON.parse(localStorage.getItem(historyKey)) || [];
-      const completedRides = localRides.filter(r => r.status === "Completed").length;
-
-      row.insertCell(2).innerText = (d.rides || 0) + completedRides;
-      row.insertCell(3).innerText = d.rating || 5;
-
-      // Show Blocked status if driver is blocked
-      row.insertCell(4).innerText = blockedDrivers.includes(d.name) ? "Blocked" : (d.available ? "Available" : "Busy");
-
-      // Action button
-      const btn = document.createElement("button");
-      btn.innerText = blockedDrivers.includes(d.name) ? "Unblock" : "Block";
-      btn.onclick = () => toggleDriverBlock(d.name);
-      row.insertCell(5).appendChild(btn);
-    });
-  } catch (err) {
-    console.error("❌ Driver load error:", err);
-  }
-}
-
-// ===============================
-// LOAD USERS
-// ===============================
-async function loadUsers() {
-  const table = document.getElementById("usersTable");
-  table.innerHTML = `
-    <tr>
-      <th>Email</th>
-      <th>Total Rides</th>
-      <th>Completed</th>
-      <th>Cancelled</th>
-      <th>Action</th>
-    </tr>
-  `;
-
-  let users = [];
-  try {
-    const res = await fetch("https://ride2-6.onrender.com/api/users");
-    if (!res.ok) throw new Error("API failed");
-    users = await res.json();
-  } catch (err) {
-    console.warn("API not available, using localStorage");
-    users = JSON.parse(localStorage.getItem("users") || "[]");
-  }
-
-  if (!users || users.length === 0) {
+  if (!drivers || drivers.length === 0) {
     const row = table.insertRow();
-    row.insertCell(0).innerText = "No Users";
-    row.insertCell(1).innerText = "0";
-    row.insertCell(2).innerText = "0";
-    row.insertCell(3).innerText = "0";
-    row.insertCell(4).innerText = "-";
+    row.insertCell(0).colSpan = 7;
+    row.cells[0].innerText = "No drivers found";
+    row.cells[0].style.color = "#aaa";
+    document.getElementById("statDrivers").innerText = "0";
     return;
   }
 
-  const blockedUsers = JSON.parse(localStorage.getItem("blockedUsers") || "[]");
+  document.getElementById("statDrivers").innerText = drivers.length;
 
-  users.forEach(u => {
-    const email = u.email || u;
-    const historyKey = "rideHistory_" + email;
-    const rides = JSON.parse(localStorage.getItem(historyKey)) || [];
+  // Also load all rides to count per driver
+  const allRides = await safeFetch(`${API}/api/rides`) || [];
 
-    let completed = 0, cancelled = 0;
-    rides.forEach(r => r.status === "Cancelled" ? cancelled++ : completed++);
+  drivers.forEach(d => {
+    // Count rides from DB
+    const driverRides     = allRides.filter(r => r.driverId && r.driverId.toString() === d._id.toString());
+    const completedCount  = driverRides.filter(r => r.status === "completed").length;
+    const cancelledCount  = driverRides.filter(r => r.status === "cancelled").length;
+    const blocked         = isDriverBlocked(d.name);
 
     const row = table.insertRow();
-    row.insertCell(0).innerText = email;
-    row.insertCell(1).innerText = rides.length;
-    row.insertCell(2).innerText = completed;
-    row.insertCell(3).innerText = cancelled;
+    row.insertCell(0).innerText = d.name;
+    row.insertCell(1).innerText = d.contact || "—";
+    row.insertCell(2).innerHTML = `<span class="badge badge-green">${completedCount}</span>`;
+    row.insertCell(3).innerHTML = `<span class="badge badge-red">${cancelledCount}</span>`;
+    row.insertCell(4).innerHTML = `<span class="badge badge-orange">⭐ ${d.rating || 5}</span>`;
 
+    // Status badge
+    let statusHtml = "";
+    if (blocked)      statusHtml = `<span class="badge badge-red">Blocked</span>`;
+    else if (d.available) statusHtml = `<span class="badge badge-green">Available</span>`;
+    else              statusHtml = `<span class="badge badge-orange">Busy</span>`;
+    row.insertCell(5).innerHTML = statusHtml;
+
+    // Block/Unblock button
     const btn = document.createElement("button");
-    btn.innerText = blockedUsers.includes(email) ? "Unblock" : "Block";
-    btn.onclick = () => toggleUserBlock(email);
-    row.insertCell(4).appendChild(btn);
+    btn.innerText = blocked ? "Unblock" : "Block";
+    btn.className = blocked ? "btn btn-unblock" : "btn btn-block";
+    btn.onclick   = () => toggleDriverBlock(d.name);
+    row.insertCell(6).appendChild(btn);
   });
 }
 
-// ===============================
-// ACTIVE RIDES MAP
-// ===============================
-async function loadActiveRidesMap() {
+// ===== LOAD USERS =====
+// ✅ Reads from /api/users (userRoutes.js → User model from MongoDB)
+async function loadUsers() {
+  const table = document.getElementById("usersTable");
+  table.innerHTML = `<tr>
+    <th>Name</th><th>Email</th><th>Total</th>
+    <th>Completed</th><th>Cancelled</th><th>Action</th>
+  </tr>`;
+
+  // ✅ GET all users from MongoDB via userRoutes
+  const users = await safeFetch(`${API}/api/users`);
+
+  if (!users || users.length === 0) {
+    const row = table.insertRow();
+    row.insertCell(0).colSpan = 6;
+    row.cells[0].innerText = "No users found — make sure /api/users GET route exists";
+    row.cells[0].style.color = "#aaa";
+    document.getElementById("statUsers").innerText = "0";
+    return;
+  }
+
+  document.getElementById("statUsers").innerText = users.length;
+
+  // Load all rides once to count per user
+  const allRides = await safeFetch(`${API}/api/rides`) || [];
+
+  let totalCompleted = 0, totalCancelled = 0;
+
+  users.forEach(u => {
+    const email   = u.email || "—";
+    const name    = u.name  || "—";
+
+    // ✅ Count rides from MongoDB rides data (matched by userId)
+    const userRides   = allRides.filter(r => r.userId && r.userId.toString() === u._id.toString());
+    const completed   = userRides.filter(r => r.status === "completed").length;
+    const cancelled   = userRides.filter(r => r.status === "cancelled").length;
+    const total       = userRides.length;
+
+    totalCompleted += completed;
+    totalCancelled += cancelled;
+
+    const blocked = isUserBlocked(email);
+
+    const row = table.insertRow();
+    row.insertCell(0).innerText = name;
+    row.insertCell(1).innerText = email;
+    row.insertCell(2).innerHTML = `<span class="badge badge-blue">${total}</span>`;
+    row.insertCell(3).innerHTML = `<span class="badge badge-green">${completed}</span>`;
+    row.insertCell(4).innerHTML = `<span class="badge badge-red">${cancelled}</span>`;
+
+    const btn = document.createElement("button");
+    btn.innerText = blocked ? "Unblock" : "Block";
+    btn.className = blocked ? "btn btn-unblock" : "btn btn-block";
+    btn.onclick   = () => toggleUserBlock(email);
+    row.insertCell(5).appendChild(btn);
+  });
+
+  // Update stat cards
+  document.getElementById("statCompleted").innerText = totalCompleted;
+  document.getElementById("statCancelled").innerText = totalCancelled;
+}
+
+// ===== LOAD ALL RIDES =====
+async function loadAllRides() {
+  const table = document.getElementById("ridesTable");
+  table.innerHTML = `<tr>
+    <th>User</th><th>Driver</th><th>Pickup</th><th>Drop</th>
+    <th>Fare</th><th>Status</th><th>Payment</th><th>Time</th>
+  </tr>`;
+
+  const rides = await safeFetch(`${API}/api/rides`);
+
+  if (!rides || rides.length === 0) {
+    const row = table.insertRow();
+    row.insertCell(0).colSpan = 8;
+    row.cells[0].innerText = "No rides found";
+    row.cells[0].style.color = "#aaa";
+    document.getElementById("statPending").innerText = "0";
+    return;
+  }
+
+  const pending = rides.filter(r => r.status === "pending").length;
+  document.getElementById("statPending").innerText = pending;
+
+  // Show newest first
+  rides.slice().reverse().forEach(r => {
+    const row = table.insertRow();
+    row.insertCell(0).innerText = r.userId?.email || r.userId || "—";
+    row.insertCell(1).innerText = r.driverId?.name || r.driverId || "—";
+    row.insertCell(2).innerText = r.pickup  || "—";
+    row.insertCell(3).innerText = r.drop    || "—";
+    row.insertCell(4).innerText = r.fare ? "₹" + r.fare : "—";
+
+    // Status badge
+    const statusMap = {
+      pending:   "badge-orange",
+      ongoing:   "badge-blue",
+      started:   "badge-blue",
+      completed: "badge-green",
+      cancelled: "badge-red"
+    };
+    const cls = statusMap[r.status] || "badge-blue";
+    row.insertCell(5).innerHTML = `<span class="badge ${cls}">${r.status || "—"}</span>`;
+
+    row.insertCell(6).innerText = r.paymentMode || "—";
+    row.insertCell(7).innerText = r.completedAt
+      ? new Date(r.completedAt).toLocaleString()
+      : (r.createdAt ? new Date(r.createdAt).toLocaleString() : "—");
+  });
+}
+
+// ===== LIVE MAP =====
+// ✅ Shows driver locations from /api/driver/locations (driverRoutes.js)
+let mapInstance = null;
+
+async function loadMap() {
   const errMsg = document.getElementById("mapError");
   errMsg.innerText = "";
 
-  try {
-    const res = await fetch("https://ride2-6.onrender.com/api/driver/locations");
-    const drivers = await res.json();
+  // Destroy old map instance
+  if (mapInstance) { mapInstance.remove(); mapInstance = null; }
+  document.getElementById("map").innerHTML = "";
 
-    const mapDiv = document.getElementById("map");
-    mapDiv.innerHTML = "";
+  mapInstance = L.map("map").setView([19.076, 72.8777], 12);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(mapInstance);
 
-    const map = L.map("map").setView([19.076, 72.8777], 12);
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
+  // Load driver locations
+  const drivers = await safeFetch(`${API}/api/driver/locations`);
 
-    if (!drivers || drivers.length === 0) {
-      errMsg.innerText = "No active drivers on map";
-      return;
+  if (!drivers || drivers.length === 0) {
+    errMsg.innerText = "ℹ️ No active drivers with location data";
+
+    // Still show map — add default marker
+    L.marker([19.076, 72.8777])
+      .addTo(mapInstance)
+      .bindPopup("📍 Mumbai — No active drivers")
+      .openPopup();
+    return;
+  }
+
+  // ✅ Add marker for each driver with lat/lng
+  drivers.forEach(d => {
+    if (d.lat && d.lng) {
+      const icon = L.divIcon({
+        className: "",
+        html: `<div style="
+          background:#0aa2e6; color:#fff; padding:5px 9px;
+          border-radius:20px; font-size:12px; font-weight:700;
+          box-shadow:0 3px 10px rgba(0,0,0,0.25);
+          white-space:nowrap;
+        ">🛺 ${d.name}</div>`,
+        iconAnchor: [20, 10]
+      });
+
+      L.marker([d.lat, d.lng], { icon })
+        .addTo(mapInstance)
+        .bindPopup(`
+          <b>🛺 ${d.name}</b><br>
+          Status: ${d.available ? "✅ Available" : "🔴 Busy"}<br>
+          Lat: ${d.lat.toFixed(4)}, Lng: ${d.lng.toFixed(4)}
+        `);
     }
+  });
 
-    drivers.forEach(d => {
-      if (d.lat && d.lng) {
-        L.marker([d.lat, d.lng])
-          .addTo(map)
-          .bindPopup(`<b>${d.name}</b><br>Contact: ${d.contact}<br>Rides: ${(d.rides || 0)}`);
-      }
-    });
-  } catch (err) {
-    console.error(err);
-    errMsg.innerText = "Unable to load driver locations";
-  }
+  // Also load active/ongoing rides and show pickup markers
+  const rides = await safeFetch(`${API}/api/rides`) || [];
+  const activeRides = rides.filter(r => r.status === "ongoing" || r.status === "started");
+
+  activeRides.forEach(r => {
+    if (r.pickup) {
+      L.circleMarker([19.076, 72.8777], {
+        radius: 8, fillColor: "#22cc88",
+        color: "#fff", weight: 2, fillOpacity: 0.9
+      }).addTo(mapInstance)
+        .bindPopup(`🟢 Active Ride<br>Pickup: ${r.pickup}<br>Drop: ${r.drop}<br>Fare: ₹${r.fare}`);
+    }
+  });
 }
 
-// ===============================
-// LOAD STATS CHART
-// ===============================
-async function loadOwnerStats() {
-  try {
-    const res = await fetch(`${API}/stats`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-
-    const labels = data.signups.map(s => s.date);
-    const values = data.signups.map(s => s.count);
-
-    if (window.signupChartInstance) window.signupChartInstance.destroy();
-
-    window.signupChartInstance = new Chart(
-      document.getElementById("signupChart").getContext("2d"),
-      {
-        type: "bar",
-        data: { labels, datasets: [{ label:"Signups", data: values, backgroundColor:"#0aa2e6" }] },
-        options: { responsive: true }
-      }
-    );
-  } catch (err) {
-    console.error(err);
-  }
+// ===== INIT =====
+async function init() {
+  await Promise.all([
+    loadDrivers(),
+    loadUsers(),
+    loadAllRides(),
+    loadMap()
+  ]);
 }
 
-// ===============================
-// INIT & AUTO-REFRESH
-// ===============================
-loadDrivers();
-loadUsers();
-loadActiveRidesMap();
-loadOwnerStats();
+init();
 
-setInterval(loadDrivers, 5000);
-setInterval(loadUsers, 5000);
+// Auto-refresh every 10 seconds
+setInterval(() => {
+  loadDrivers();
+  loadUsers();
+  loadAllRides();
+}, 10000);
 
+// Map refresh every 15 seconds
+setInterval(loadMap, 15000);
 </script>
 </body>
 </html>

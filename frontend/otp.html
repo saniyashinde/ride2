@@ -4,178 +4,170 @@
 <meta charset="UTF-8">
 <title>Mobile Number Verification | MoveMaster</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap');
 
-/* ===== GLOBAL ===== */
-* { box-sizing: border-box; font-family:'Baloo 2', cursive; margin:0; padding:0; }
+* { box-sizing:border-box; margin:0; padding:0; font-family:'Baloo 2', cursive; }
+
 body {
-  background: #f2f2f2;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  padding-top:70px; /* space for navbar */
-  overflow:hidden;
+  background: #eef6fb;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 75px;
 }
 
 /* ===== NAVBAR ===== */
-.navbar{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:60px;
+.navbar {
+  position:fixed; top:0; left:0; width:100%; height:62px;
   background:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 30px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.15);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 28px;
+  box-shadow:0 3px 18px rgba(0,0,0,0.10);
   z-index:999;
 }
-
-.nav-left{
-  font-size:20px;
-  font-weight:600;
-  color:#0aa2e6;
-  display:flex;
-  align-items:center;
-  gap:8px;
+.nav-left { font-size:20px; font-weight:700; color:#0aa2e6; display:flex; align-items:center; gap:8px; }
+.nav-center { display:flex; gap:22px; }
+.nav-center a {
+  text-decoration:none; color:#555; font-size:14.5px;
+  display:flex; align-items:center; gap:5px;
+  border-bottom:2px solid transparent;
+  transition:color 0.2s, border-color 0.2s;
 }
-
-.nav-center{
-  display:flex;
-  gap:25px;
+.nav-center a:hover { color:#0aa2e6; border-bottom-color:#0aa2e6; }
+.profile { position:relative; }
+.profile-btn {
+  cursor:pointer; background:#0aa2e6; color:#fff;
+  padding:7px 14px; border-radius:20px;
+  display:flex; align-items:center; gap:6px;
+  font-size:14px; font-weight:600;
 }
-
-.nav-center a{
-  text-decoration:none;
-  color:#333;
-  font-size:15px;
-  display:flex;
-  align-items:center;
-  gap:6px;
+.dropdown {
+  position:absolute; right:0; top:52px;
+  background:#fff; width:168px; border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.15);
+  display:none; overflow:hidden; z-index:1000;
 }
-
-.nav-center a:hover{ color:#0aa2e6; }
-
-.profile{ position:relative; }
-
-.profile-btn{
-  cursor:pointer;
-  background:#0aa2e6;
-  color:#fff;
-  padding:8px 12px;
-  border-radius:20px;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
-.dropdown{
-  position:absolute;
-  right:0;
-  top:48px;
-  background:#fff;
-  width:160px;
-  border-radius:10px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.15);
-  display:none;
-}
-
-.dropdown a{
-  display:block;
-  padding:12px;
-  text-decoration:none;
-  color:#333;
-  font-size:14px;
-}
-
-.dropdown a:hover{ background:#f2f2f2; }
+.dropdown a { display:block; padding:12px 16px; text-decoration:none; color:#444; font-size:14px; }
+.dropdown a:hover { background:#f0f8ff; color:#0aa2e6; }
 
 /* ===== CARD ===== */
 .card {
-  background: white;
-  padding: 30px;
-  width: 360px;
-  text-align: center;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  background:#fff;
+  padding:36px 32px;
+  width:400px;
+  border-radius:22px;
+  box-shadow:0 12px 40px rgba(10,162,230,0.13);
+  text-align:center;
+  animation:slideUp 0.45s ease;
 }
-
-input {
-  width: 70%;
-  padding: 12px;
-  margin: 15px 0;
-  font-size: 16px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(22px); }
+  to   { opacity:1; transform:translateY(0); }
 }
+.card-icon { font-size:44px; display:block; margin-bottom:8px; animation:bounce 2s infinite; }
+@keyframes bounce {
+  0%,100% { transform:translateY(0); }
+  50%      { transform:translateY(-7px); }
+}
+.card h3 { font-size:20px; font-weight:700; color:#2c3e50; margin-bottom:22px; }
 
+/* ===== MOBILE INPUT ===== */
+.input-row { display:flex; gap:8px; margin-bottom:14px; }
 select {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  margin-right: 10px;
-  font-size: 16px;
+  padding:11px 10px;
+  border:2px solid #dce8f0; border-radius:10px;
+  font-size:14px; font-family:'Baloo 2', cursive;
+  background:#f8fcff; color:#2c3e50;
+  cursor:pointer; flex-shrink:0;
 }
+select:focus { outline:none; border-color:#0aa2e6; }
+.input-row input {
+  flex:1; padding:11px 14px; font-size:16px;
+  border:2px solid #dce8f0; border-radius:10px;
+  font-family:'Baloo 2', cursive; color:#2c3e50; background:#f8fcff;
+  transition:border 0.2s;
+}
+.input-row input:focus { outline:none; border-color:#0aa2e6; }
 
-button {
-  width: 100%;
-  padding: 12px;
-  background: #4db8ff;
-  color: white;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 8px;
+/* ===== SEND BTN ===== */
+#sendBtn {
+  width:100%; padding:13px;
+  background:#0aa2e6; color:#fff;
+  border:none; border-radius:11px;
+  font-size:16px; font-weight:700;
+  font-family:'Baloo 2', cursive;
+  cursor:pointer;
+  transition:background 0.2s, transform 0.15s;
 }
+#sendBtn:hover { background:#088ac7; transform:translateY(-1px); }
+#sendBtn:disabled { background:#a6d4ff; cursor:not-allowed; transform:none; }
 
-button:disabled {
-  background: #a6d4ff;
-  cursor: not-allowed;
+/* ===== STATUS MSG ===== */
+/* ✅ ID is "statusMsg" — matches otp.js exactly */
+#statusMsg {
+  font-size:14px; font-weight:600;
+  margin-top:12px; min-height:22px;
+  animation:pulse 1.2s infinite;
 }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
 
-#msg {
-  margin-top: 15px;
-  font-weight: bold;
-  font-size: 15px;
+/* ===== OTP RESULT ===== */
+#otpResult {
+  display:none;
+  margin-top:22px;
+  animation:fadeIn 0.4s ease;
 }
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.otp-label { font-size:13px; color:#888; margin-bottom:8px; }
+.otp-number-box {
+  background: linear-gradient(135deg, #fffbe6, #fff3cd);
+  border: 2.5px dashed #ffc107;
+  border-radius:16px;
+  padding:22px 10px 14px;
+  margin-bottom:16px;
+}
+.otp-digits {
+  font-size:54px; font-weight:700;
+  color:#ff8c00; letter-spacing:16px;
+  display:block;
+  animation:popIn 0.5s ease;
+}
+@keyframes popIn {
+  0%   { transform:scale(0.5); opacity:0; }
+  70%  { transform:scale(1.1); }
+  100% { transform:scale(1); opacity:1; }
+}
+.otp-note { font-size:12px; color:#aaa; margin-top:6px; }
 
-.loading {
-  font-size: 14px;
-  color: #333;
-  margin-top: 10px;
-  animation: blink 1s infinite;
+/* ===== BUTTONS ===== */
+.btn-copy {
+  width:100%; padding:12px;
+  background:#fff; color:#0aa2e6;
+  border:2px solid #0aa2e6; border-radius:11px;
+  font-size:15px; font-weight:700;
+  font-family:'Baloo 2', cursive;
+  cursor:pointer; margin-bottom:10px;
+  transition:all 0.2s;
 }
+.btn-copy:hover { background:#e8f7ff; }
+.btn-copy.copied { background:#22cc88; color:#fff; border-color:#22cc88; }
 
-@keyframes blink {
-  0%, 50%, 100% { opacity: 1; }
-  25%, 75% { opacity: 0.3; }
+.btn-next {
+  width:100%; padding:13px;
+  background:#22cc88; color:#fff;
+  border:none; border-radius:11px;
+  font-size:16px; font-weight:700;
+  font-family:'Baloo 2', cursive;
+  cursor:pointer;
+  transition:background 0.2s, transform 0.15s;
+  box-shadow:0 4px 14px rgba(34,204,136,0.25);
 }
-
-/* Cute popup */
-.otp-popup {
-  position: fixed;
-  top: 20%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fffbe6;
-  border: 2px solid #ffcc33;
-  padding: 20px 30px;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-  font-size: 18px;
-  display: none;
-  text-align: center;
-  z-index: 1000;
-}
-.otp-popup span {
-  font-weight: bold;
-  color: #ff6600;
-  font-size: 22px;
-}
+.btn-next:hover { background:#1aaa70; transform:translateY(-1px); }
 </style>
 </head>
 <body>
@@ -183,18 +175,15 @@ button:disabled {
 <!-- ===== NAVBAR ===== -->
 <div class="navbar">
   <div class="nav-left">🛺 MoveMaster</div>
-
   <div class="nav-center">
     <a href="home.html">🏠 Home</a>
     <a href="services.html">🛺 Services</a>
     <a href="activity.html">📊 Activity</a>
     <a href="help.html">🆘 Help</a>
   </div>
-
   <div class="profile">
-   <div class="profile-btn" onclick="toggleMenu()">
-      👤  ⌄
-    </div>  <div class="dropdown" id="menu">
+    <div class="profile-btn" onclick="toggleMenu()">👤 ⌄</div>
+    <div class="dropdown" id="menu">
       <a href="profile.html">👤 My Profile</a>
       <a href="ridehistory.html">📜 Ride History</a>
       <a href="#" onclick="logout()">🚪 Logout</a>
@@ -204,114 +193,39 @@ button:disabled {
 
 <!-- ===== CARD ===== -->
 <div class="card">
-  <h3>🛺Mobile Number Verification 🛺</h3>
-  
-  <div>
+  <span class="card-icon">🛺</span>
+  <h3>Mobile Number Verification</h3>
+
+  <!-- Mobile Input -->
+  <div class="input-row">
     <select id="countryCode">
-      <option value="+91">🇮🇳 +91</option>
+      <option value="+91">🇮🇳 IN +91</option>
     </select>
-    <input type="text" id="mobile" placeholder="Enter your mobile number" maxlength="10" />
+    <!-- ✅ type="text", no oninput restriction so user can type freely -->
+    <input type="text" id="mobile" placeholder="Enter 10-digit number" maxlength="10" />
   </div>
-  
-  <button id="sendBtn" onclick="sendOTP()">Send OTP</button>
-  
-  <p id="msg"></p>
-  <p id="loadingMsg" class="loading"></p>
+
+  <button id="sendBtn" onclick="sendOTP()">📩 Send OTP</button>
+
+  <!-- ✅ ID is "statusMsg" — matches otp.js -->
+  <p id="statusMsg"></p>
+
+  <!-- OTP Result — shown after countdown -->
+  <div id="otpResult">
+    <div class="otp-label">Your OTP — Share with your driver 🛺</div>
+    <div class="otp-number-box">
+      <span class="otp-digits" id="otpDigits">----</span>
+      <div class="otp-note">Tell this OTP to your driver to start the ride</div>
+    </div>
+    <button class="btn-copy" id="copyBtn" onclick="copyOTP()">📋 Copy OTP</button>
+    <button class="btn-next" onclick="goNext()">Confirm Ride ➜</button>
+  </div>
 </div>
 
-<!-- Cute OTP popup -->
-<div class="otp-popup" id="otpPopup">
-  Your OTP is: <span id="otpCode">1234</span> 🎉
-</div>
-
-<script>
-// NAV USER NAME FROM LOGIN EMAIL
-const email = localStorage.getItem("userEmail");
-if (email) {
-  const name = email.split("@")[0];
-  document.getElementById("navUserName").innerText =
-    name.charAt(0).toUpperCase() + name.slice(1);
-} else {
-  document.getElementById("navUserName").innerText = "Guest";
+<!-- ✅ otp.js loaded from same folder -->
+<script src="otp.js"></script>
+function goNext() {
+  window.location.href = "confirm.html";
 }
-
-
-// ===== NAVBAR MENU =====
-function toggleMenu(){
-  const menu=document.getElementById("menu");
-  menu.style.display=menu.style.display==="block"?"none":"block";
-}
-function logout(){
-  localStorage.clear();
-  alert("Logged out successfully");
-  window.location.href="login.html";
-}
-
-// ===== SEND OTP =====
-function sendOTP() {
-  const mobile = document.getElementById('mobile').value.trim();
-  const msg = document.getElementById('msg');
-  const loadingMsg = document.getElementById('loadingMsg');
-  const otpPopup = document.getElementById('otpPopup');
-  const otpCodeSpan = document.getElementById('otpCode');
-
-  if(mobile === "" || mobile.length !== 10 || isNaN(mobile)) {
-    msg.style.color = 'red';
-    msg.textContent = "⚠️ Please enter a valid 10-digit mobile number!";
-    return;
-  }
-
-  msg.textContent = "";
-  document.getElementById('sendBtn').disabled = true;
-
-  // Generate random 4-digit OTP
- // Generate random 4-digit OTP
-const otp = Math.floor(1000 + Math.random() * 9000).toString();
-otpCodeSpan.textContent = otp;
-
-// 🔥 SAVE OTP INTO CURRENT RIDE (VERY IMPORTANT)
-let ride = JSON.parse(localStorage.getItem("currentRide"));
-
-if (ride) {
-  ride.otp = otp;          // save same OTP
-  ride.otpVerified = false;
-  localStorage.setItem("currentRide", JSON.stringify(ride));
-}
-
-
-  // Show loading message
-  let countdown = 10;
-  loadingMsg.textContent = `📩 Sending OTP to +91-${mobile}... ${countdown}s`;
-
-  const interval = setInterval(() => {
-    countdown--;
-    if(countdown > 0) {
-      loadingMsg.textContent = `📩 Sending OTP to +91-${mobile}... ${countdown}s`;
-    } else {
-      clearInterval(interval);
-      loadingMsg.textContent = "";
-      
-      // Show OTP popup
-      otpPopup.style.display = "block";
-
-      // Auto hide popup after 3 sec
-      setTimeout(() => {
-        otpPopup.style.display = "none";
-
-        // Show confirmation message
-        msg.style.color = 'green';
-        msg.textContent = "✅ Your ride is confirmed! Get ready for your Auto 🛺";
-
-        // Redirect to confirm.html after 2 sec
-        setTimeout(() => {
-          window.location.href = "confirm.html";
-        }, 2000);
-
-      }, 3000);
-    }
-  }, 1000);
-}
-</script>
-
 </body>
 </html>

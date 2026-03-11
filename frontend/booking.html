@@ -279,12 +279,14 @@ button:hover{
 <script>
 // ===== NAVBAR USERNAME =====
 const email = localStorage.getItem("userEmail");
-if (email) {
-  const name = email.split("@")[0];
-  document.getElementById("userName").innerText =
-    name.charAt(0).toUpperCase() + name.slice(1);
-} else {
-  document.getElementById("userName").innerText = "Guest";
+const userNameEl = document.getElementById("userName");
+if (userNameEl) {
+  if (email) {
+    const name = email.split("@")[0];
+    userNameEl.innerText = name.charAt(0).toUpperCase() + name.slice(1);
+  } else {
+    userNameEl.innerText = "Guest";
+  }
 }
 
 // ===== NAVBAR DROPDOWN =====
@@ -325,47 +327,57 @@ async function bookRide() {
     return;
   }
 
-  // 1️⃣ Geocode
-  const p = await geocode(pickup);
-  const d = await geocode(drop);
+  // Disable button to prevent double click
+  const btn = event.target;
+  btn.disabled = true;
+  btn.innerText = "Booking...";
 
-  if (!p || !d) {
-    alert("Invalid location");
-    return;
+  try {
+    // 1️⃣ Geocode
+    const [p, d] = await Promise.all([geocode(pickup), geocode(drop)]);
+    if (!p || !d) throw new Error("Invalid location");
+
+    // 2️⃣ Distance calculation
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=false`
+    );
+    const data = await res.json();
+    if (!data.routes || !data.routes.length) throw new Error("Route not found");
+
+    const distance = (data.routes[0].distance / 1000).toFixed(2);
+    const fare = Math.round(distance * 25);
+
+    // 3️⃣ Save for price.html
+    localStorage.setItem("pickup", pickup);
+    localStorage.setItem("drop", drop);
+    localStorage.setItem("distance", distance);
+    localStorage.setItem("fare", fare);
+
+    // 4️⃣ Backend save
+    const backendRes = await fetch("http://localhost:5000/api/rides/book-ride", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: localStorage.getItem("userId"),
+        pickup,
+        drop,
+        distance,
+        fare
+      })
+    });
+
+    if (!backendRes.ok) throw new Error("Failed to save ride");
+
+    // 5️⃣ Redirect only after all steps succeed
+    window.location.href = "price.html";
+
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+    btn.disabled = false;
+    btn.innerText = "Find Auto & Book Ride";
   }
-
-  // 2️⃣ Distance calculation
-  const res = await fetch(
-    `https://router.project-osrm.org/route/v1/driving/${p.lng},${p.lat};${d.lng},${d.lat}?overview=false`
-  );
-  const data = await res.json();
-
-  const distance = (data.routes[0].distance / 1000).toFixed(2);
-  const fare = Math.round(distance * 25);
-
-  // 3️⃣ Save for price.html
-  localStorage.setItem("pickup", pickup);
-  localStorage.setItem("drop", drop);
-  localStorage.setItem("distance", distance);
-  localStorage.setItem("fare", fare);
-
-  // 4️⃣ 🔥 BACKEND: SAVE RIDE (ONLY ONCE)
-  await fetch("https://ride2-6.onrender.com/api/rides/book-ride", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      userId: localStorage.getItem("userId"),
-      pickup,
-      drop,
-      distance,
-      fare
-    })
-  });
-
-  // 5️⃣ Redirect
-  window.location.href = "price.html";
 }
-
 
 </script>
 

@@ -2,152 +2,205 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Activity | MoveMaster</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
-
-body{
-  font-family:'Baloo 2',cursive;
-  margin:0;
-  background:linear-gradient(135deg,#fdfbfb,#ebedee);
-  min-height:100vh;
+:root {
+  --blue:#0aa2e6; --blue-dark:#0880b8; --blue-light:#e0f5ff;
+  --teal:#00c9a7; --orange:#ff7043; --yellow:#ffd600;
+  --red:#f44336; --green:#2ecc71;
+  --bg:#f0f8ff; --card:#ffffff; --text:#1a2340; --muted:#7a8aaa;
+  --shadow:0 8px 30px rgba(10,162,230,0.12);
+  --shadow-lg:0 16px 50px rgba(10,162,230,0.18);
 }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;color:var(--text);overflow-x:hidden;}
+
+body::before{content:'';position:fixed;top:-120px;right:-120px;width:420px;height:420px;
+  background:radial-gradient(circle,rgba(10,162,230,0.15),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-100px;left:-100px;width:350px;height:350px;
+  background:radial-gradient(circle,rgba(0,201,167,0.12),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
 
 /* NAVBAR */
-.navbar{
-  background:#fff;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 30px;
-  box-shadow:0 6px 20px rgba(0,0,0,0.15);
-}
+.navbar{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.96);backdrop-filter:blur(12px);
+  display:flex;justify-content:space-between;align-items:center;padding:14px 32px;
+  box-shadow:0 4px 24px rgba(10,162,230,0.1);border-bottom:2px solid rgba(10,162,230,0.07);}
+.nav-left{font-size:22px;color:var(--blue);font-weight:900;letter-spacing:-0.5px;}
+.nav-center a{margin:0 14px;text-decoration:none;color:#555;font-size:15px;font-weight:700;transition:color .2s;}
+.nav-center a:hover,.nav-center a.active{color:var(--blue);}
 
-.nav-left{
-  font-size:22px;
-  color:#0aa2e6;
-  font-weight:600;
-}
+/* HERO */
+.hero{background:linear-gradient(135deg,#0aa2e6 0%,#00c9a7 100%);padding:40px 32px 85px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'🛺';font-size:220px;position:absolute;right:-40px;top:-30px;opacity:0.07;transform:rotate(-12deg);line-height:1;pointer-events:none;}
+.hero h1{font-size:32px;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-0.5px;}
+.hero p{color:rgba(255,255,255,0.85);font-size:16px;font-weight:600;}
 
-.nav-center a{
-  margin:0 15px;
-  text-decoration:none;
-  color:#333;
-  font-size:16px;
-}
+/* CANCEL MSG */
+#cancelMsg{display:none;background:#fff0f0;color:var(--red);padding:14px 20px;border-radius:14px;
+  text-align:center;font-weight:700;margin:-22px auto 0;width:92%;max-width:700px;
+  border-left:5px solid var(--red);position:relative;z-index:10;box-shadow:var(--shadow);animation:slideDown .4s ease;}
 
-.nav-center a:hover{
-  color:#0aa2e6;
-}
-
-/* HEADER */
-.header{
-  text-align:center;
-  margin:35px 0 20px;
-}
-
-.header h2{
-  color:#0aa2e6;
-  font-size:28px;
-}
-
-.header p{
-  color:#666;
-}
-
-/* CANCEL MESSAGE */
-#cancelMsg{
-  display:none;
-  background:#ffe6e6;
-  color:#c62828;
-  padding:12px;
-  border-radius:14px;
-  text-align:center;
-  font-weight:bold;
-  margin:0 auto 25px;
-  width:90%;
-  max-width:600px;
-}
+/* PROFILE CARD */
+.profile-section{width:92%;max-width:1100px;margin:-52px auto 28px;position:relative;z-index:10;}
+.profile-card{background:var(--card);border-radius:24px;padding:26px 30px;box-shadow:var(--shadow-lg);
+  display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+.avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--teal));
+  display:flex;align-items:center;justify-content:center;font-size:30px;color:#fff;font-weight:900;
+  flex-shrink:0;box-shadow:0 6px 20px rgba(10,162,230,0.35);}
+.profile-info h2{font-size:20px;font-weight:900;color:var(--text);}
+.profile-info p{color:var(--muted);font-size:13px;font-weight:600;margin-top:3px;}
+.profile-badges{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.badge{padding:8px 16px;border-radius:30px;font-size:13px;font-weight:800;display:flex;align-items:center;gap:6px;}
+.badge-gold{background:linear-gradient(135deg,#ffd600,#ffab00);color:#5a3a00;}
+.badge-silver{background:linear-gradient(135deg,#bdbdbd,#9e9e9e);color:#fff;}
+.badge-bronze{background:var(--blue-light);color:var(--blue-dark);}
 
 /* STATS */
-.stats{
-  display:flex;
-  justify-content:center;
-  gap:25px;
-  flex-wrap:wrap;
-  margin-bottom:35px;
-}
+.stats-section{width:92%;max-width:1100px;margin:0 auto 28px;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;}
+.stat-card{background:var(--card);border-radius:20px;padding:22px 18px;text-align:center;
+  box-shadow:var(--shadow);position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;}
+.stat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:20px 20px 0 0;}
+.stat-card:nth-child(1)::before{background:linear-gradient(90deg,var(--blue),#42d1f5);}
+.stat-card:nth-child(2)::before{background:linear-gradient(90deg,var(--teal),#00e5c5);}
+.stat-card:nth-child(3)::before{background:linear-gradient(90deg,var(--orange),#ffcc02);}
+.stat-card:nth-child(4)::before{background:linear-gradient(90deg,#9c27b0,#e91e63);}
+.stat-card:nth-child(5)::before{background:linear-gradient(90deg,var(--green),var(--teal));}
+.stat-icon{font-size:26px;margin-bottom:6px;}
+.stat-num{font-size:30px;font-weight:900;color:var(--blue);line-height:1;margin-bottom:4px;font-family:'Poppins',sans-serif;}
+.stat-num.teal{color:var(--teal);}
+.stat-num.orange{color:var(--orange);}
+.stat-num.purple{color:#9c27b0;}
+.stat-num.green{color:var(--green);}
+.stat-label{font-size:12px;color:var(--muted);font-weight:700;}
 
-.stat{
-  background:#fff;
-  padding:22px;
-  border-radius:22px;
-  width:190px;
-  text-align:center;
-  box-shadow:0 10px 25px rgba(0,0,0,0.15);
-}
+/* LOYALTY CARD */
+.loyalty-section{width:92%;max-width:1100px;margin:0 auto 28px;}
+.loyalty-card{background:linear-gradient(135deg,#1a2340,#0a3a60);border-radius:20px;padding:22px 28px;
+  color:#fff;box-shadow:0 12px 35px rgba(10,36,80,0.28);display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.loyalty-info{flex:1;min-width:200px;}
+.loyalty-info h3{font-size:18px;font-weight:800;margin-bottom:4px;}
+.loyalty-info p{font-size:13px;color:rgba(255,255,255,0.65);}
+.loyalty-bar-wrap{flex:2;min-width:200px;}
+.loyalty-tiers{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px;font-weight:700;}
+.loyalty-bar{height:12px;background:rgba(255,255,255,0.12);border-radius:20px;overflow:hidden;}
+.loyalty-fill{height:100%;background:linear-gradient(90deg,#ffd600,#ff9800,var(--teal));border-radius:20px;
+  width:0%;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+.loyalty-pts{font-size:26px;font-weight:900;color:var(--yellow);font-family:'Poppins',sans-serif;white-space:nowrap;}
 
-.stat h3{
-  color:#0aa2e6;
-  font-size:30px;
-  margin:0;
-}
+/* TIPS */
+.tips-section{width:92%;max-width:1100px;margin:0 auto 28px;}
+.tips-card{background:linear-gradient(135deg,#fff8e1,#fff3e0);border-radius:20px;padding:20px 24px;
+  border-left:5px solid var(--orange);display:flex;align-items:flex-start;gap:14px;
+  box-shadow:0 4px 20px rgba(255,112,67,0.1);}
+.tips-icon{font-size:30px;flex-shrink:0;}
+.tips-content h4{font-size:16px;font-weight:800;color:#bf360c;margin-bottom:6px;}
+.tips-list{list-style:none;padding:0;}
+.tips-list li{font-size:13px;color:#5d4037;font-weight:600;margin-bottom:3px;padding-left:16px;position:relative;}
+.tips-list li::before{content:'→';position:absolute;left:0;color:var(--orange);}
 
-/* ACTIVITIES */
-.activities{
-  width:92%;
-  max-width:1100px;
-  margin:auto;
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:22px;
-  padding-bottom:40px;
-}
+/* SECTION TITLE */
+.section-title{width:92%;max-width:1100px;margin:0 auto 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.section-title h3{font-size:20px;font-weight:900;color:var(--text);}
+.filter-tabs{display:flex;gap:8px;}
+.tab{padding:7px 16px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;
+  border:2px solid transparent;transition:all .2s;background:#fff;color:var(--muted);box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+.tab.active,.tab:hover{background:var(--blue);color:#fff;border-color:var(--blue);}
 
-.card{
-  background:#fff;
-  padding:22px;
-  border-radius:22px;
-  box-shadow:0 12px 28px rgba(0,0,0,0.15);
-}
+/* ACTIVITIES GRID */
+.activities{width:92%;max-width:1100px;margin:0 auto;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;padding-bottom:50px;}
 
-/* CANCELLED CARD */
-.cancelled{
-  border:2px solid #f44336;
-  background:#fff0f0;
-}
+/* RIDE CARD */
+.ride-card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;
+  transition:transform .25s,box-shadow .25s;animation:fadeUp .5s ease both;position:relative;}
+.ride-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg);}
 
-.cancelled .icon{
-  color:#f44336;
-  font-size:38px;
-}
+.card-top{padding:20px 22px 16px;border-bottom:1px solid rgba(10,162,230,0.07);position:relative;}
+.card-status{position:absolute;top:16px;right:16px;padding:5px 12px;border-radius:20px;
+  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;}
+.status-completed{background:#e8faf2;color:var(--green);}
+.status-cancelled{background:#ffebee;color:var(--red);}
+.card-icon{font-size:34px;margin-bottom:8px;}
+.card-title{font-size:17px;font-weight:800;color:var(--text);margin-bottom:2px;}
+.card-sub{font-size:13px;color:var(--muted);font-weight:600;}
+
+/* ROUTE DISPLAY */
+.route-display{margin:14px 0 0;display:flex;align-items:center;gap:8px;
+  background:var(--blue-light);border-radius:12px;padding:12px 14px;}
+.route-point{display:flex;flex-direction:column;gap:3px;flex:1;}
+.route-label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;}
+.route-name{font-size:13px;font-weight:700;color:var(--text);}
+.route-arrow{font-size:18px;color:var(--blue);flex-shrink:0;}
+
+.card-bottom{padding:14px 22px;}
+.card-meta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
+.meta-item{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--muted);}
+.meta-item span{color:var(--text);font-weight:700;}
 
 /* PROGRESS */
-.progress{
-  height:10px;
-  background:#eee;
-  border-radius:10px;
-  margin-top:12px;
-}
+.prog-wrap{margin-bottom:12px;}
+.prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:5px;}
+.prog-bar{height:8px;background:#eef4ff;border-radius:10px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:10px;transition:width 1s ease;}
 
-.progress div{
-  height:100%;
-  background:#0aa2e6;
-  border-radius:10px;
-}
+/* DRIVER ROW */
+.driver-row{display:flex;align-items:center;gap:10px;padding:12px 14px;
+  background:linear-gradient(90deg,#f0fdf8,#e0f5ff);border-radius:12px;margin-bottom:12px;}
+.driver-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));
+  display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;font-weight:800;flex-shrink:0;}
+.driver-info{flex:1;}
+.driver-name{font-size:13px;font-weight:800;color:var(--text);}
+.driver-sub{font-size:11px;color:var(--muted);font-weight:600;}
+.driver-rating{font-size:13px;color:var(--orange);font-weight:700;}
+
+/* CANCELLED CARD */
+.cancelled-card{border:2px solid #ffcdd2;}
+.cancelled-card .card-top{background:#fff5f5;}
+
+/* REVIEW BOX */
+.review-box{border-top:1px solid rgba(10,162,230,0.08);padding:14px 22px;}
+.review-title{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px;}
+.stars-row{display:flex;gap:4px;margin-bottom:6px;}
+.star{font-size:22px;cursor:pointer;transition:transform .15s;filter:grayscale(1) opacity(0.35);}
+.star.filled{filter:none;transform:scale(1.1);}
+.star:hover{transform:scale(1.2);filter:none;}
+.review-comment-display{font-size:13px;color:#555;font-style:italic;font-weight:600;
+  background:var(--blue-light);padding:9px 12px;border-radius:10px;margin-top:6px;}
+.review-input-area{display:none;margin-top:10px;}
+.review-input-area textarea{width:100%;border:2px solid rgba(10,162,230,0.2);border-radius:12px;
+  padding:10px 12px;font-family:'Nunito',sans-serif;font-size:13px;resize:none;outline:none;
+  height:70px;transition:border-color .2s;font-weight:600;}
+.review-input-area textarea:focus{border-color:var(--blue);}
+.review-submit{margin-top:8px;padding:9px 20px;background:var(--blue);color:#fff;border:none;
+  border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;transition:background .2s;font-family:'Nunito',sans-serif;}
+.review-submit:hover{background:var(--blue-dark);}
 
 /* EMPTY */
-.empty{
-  grid-column:1/-1;
-  text-align:center;
-  padding:40px;
-  font-size:18px;
-  color:#777;
+.empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-icon{font-size:64px;margin-bottom:16px;}
+.empty h3{font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px;}
+.empty p{font-size:15px;font-weight:600;}
+.empty-btn{display:inline-block;margin-top:20px;padding:12px 28px;background:var(--blue);
+  color:#fff;border-radius:30px;text-decoration:none;font-weight:800;font-size:15px;transition:background .2s;}
+.empty-btn:hover{background:var(--blue-dark);}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
+
+@media(max-width:600px){
+  .profile-card{flex-direction:column;align-items:flex-start;}
+  .profile-badges{margin-left:0;}
+  .navbar{padding:12px 16px;}
+  .hero{padding:28px 16px 75px;}
+  .nav-center a{margin:0 8px;font-size:13px;}
+  .loyalty-card{flex-direction:column;}
 }
 </style>
 </head>
-
 <body>
 
 <!-- NAVBAR -->
@@ -155,32 +208,110 @@ body{
   <div class="nav-left">🛺 MoveMaster</div>
   <div class="nav-center">
     <a href="booking.html">🏠 Home</a>
-    <a href="activity.html">📊 Activity</a>
+    <a href="activity.html" class="active">📊 Activity</a>
+    <a href="help.html">🆘 Help</a>
   </div>
 </div>
 
-<!-- HEADER -->
-<div class="header">
-  <h2>🛺Your Ride Activity🛺</h2>
-  <p>Only your rides are shown here 💙</p>
+<!-- HERO -->
+<div class="hero">
+  <h1>🛺 Your Ride Activity</h1>
+  <p>All your journeys, reviews &amp; rewards in one place 💙</p>
 </div>
 
-<!-- ❌ CANCEL MESSAGE -->
+<!-- CANCEL MESSAGE -->
 <p id="cancelMsg"></p>
 
+<!-- USER PROFILE CARD -->
+<div class="profile-section">
+  <div class="profile-card" id="profileCard" style="display:none">
+    <div class="avatar" id="userAvatar">👤</div>
+    <div class="profile-info">
+      <h2 id="userName">—</h2>
+      <p id="userEmail">—</p>
+      <p id="memberSince" style="margin-top:4px;font-size:12px;color:#aaa;">📅 —</p>
+    </div>
+    <div class="profile-badges">
+      <span class="badge badge-bronze" id="tierBadge">🥉 Bronze Rider</span>
+    </div>
+  </div>
+</div>
+
 <!-- STATS -->
-<div class="stats">
-  <div class="stat">
-    <h3 id="🛺totalRides">0</h3>
-    <p>Total Rides</p>
+<div class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">🛺</div>
+      <div class="stat-num" id="totalRides">0</div>
+      <div class="stat-label">Total Rides</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📍</div>
+      <div class="stat-num teal" id="totalKM">0</div>
+      <div class="stat-label">KM Travelled</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💸</div>
+      <div class="stat-num orange" id="totalSpent">₹0</div>
+      <div class="stat-label">Total Spent</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏆</div>
+      <div class="stat-num purple" id="loyaltyPts">0</div>
+      <div class="stat-label">Loyalty Points</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-num green" id="avgRating">—</div>
+      <div class="stat-label">Avg. Rating Given</div>
+    </div>
   </div>
-  <div class="stat">
-    <h3 id="totalKM">0</h3>
-    <p>KM Travelled</p>
+</div>
+
+<!-- LOYALTY BAR -->
+<div class="loyalty-section">
+  <div class="loyalty-card">
+    <div class="loyalty-info">
+      <h3>🏅 Loyalty Status</h3>
+      <p id="loyaltyMsg">Complete rides to earn points!</p>
+    </div>
+    <div class="loyalty-bar-wrap">
+      <div class="loyalty-tiers">
+        <span>🥉 Bronze (0)</span>
+        <span>🥈 Silver (50)</span>
+        <span>🥇 Gold (150+)</span>
+      </div>
+      <div class="loyalty-bar">
+        <div class="loyalty-fill" id="loyaltyFill"></div>
+      </div>
+    </div>
+    <div class="loyalty-pts" id="loyaltyDisplay">0 pts</div>
   </div>
-  <div class="stat">
-    <h3 id="points">0</h3>
-    <p>Loyalty Points</p>
+</div>
+
+<!-- TIPS BANNER -->
+<div class="tips-section">
+  <div class="tips-card">
+    <div class="tips-icon">💡</div>
+    <div class="tips-content">
+      <h4>Pro Rider Tips</h4>
+      <ul class="tips-list">
+        <li>Rate your driver after every ride to earn bonus points</li>
+        <li>Reach Silver (50 pts) to unlock priority booking</li>
+        <li>Reach Gold (150 pts) for exclusive fare discounts on every ride</li>
+        <li>Share MoveMaster with friends — earn 10 pts per referral!</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION TITLE + FILTERS -->
+<div class="section-title">
+  <h3>🗂️ Ride History</h3>
+  <div class="filter-tabs">
+    <div class="tab active" onclick="filterRides('all',this)">All</div>
+    <div class="tab" onclick="filterRides('completed',this)">✅ Completed</div>
+    <div class="tab" onclick="filterRides('cancelled',this)">❌ Cancelled</div>
   </div>
 </div>
 
@@ -188,76 +319,245 @@ body{
 <div class="activities" id="activityList"></div>
 
 <script>
-// 🔔 SHOW CANCEL MESSAGE (ONCE)
+// ── CANCEL MSG ──
 const cancelMsg = localStorage.getItem("lastCancelMessage");
 if (cancelMsg) {
-  const div = document.getElementById("cancelMsg");
-  div.innerText = cancelMsg;
-  div.style.display = "block";
+  const d = document.getElementById("cancelMsg");
+  d.innerText = cancelMsg; d.style.display = "block";
   localStorage.removeItem("lastCancelMessage");
 }
 
-/* USER */
-const email = localStorage.getItem("loggedInEmail");
+// ── USER ──
+const email = localStorage.getItem("loggedInEmail") || localStorage.getItem("userEmail");
+const userId = localStorage.getItem("userId");
 const activityList = document.getElementById("activityList");
 
+const DRIVERS = ["Raju Bhai","Santosh Kumar","Manoj Auto","Dinesh Chaudhary","Ramesh Yadav","Arvind Patil","Suresh Tiwari","Vikram Singh"];
+const driverRatings = ["4.7","4.8","4.6","4.9","4.7","4.8","4.5","4.9"];
+let allCards = [];
+
 if (!email) {
-  activityList.innerHTML = `<div class="empty">Please login to see your activity</div>`;
+  activityList.innerHTML = `<div class="empty"><div class="empty-icon">🔒</div>
+    <h3>Please Login First</h3><p>Login to see your ride activity</p>
+    <a href="login.html" class="empty-btn">Go to Login</a></div>`;
 } else {
 
+  // ── PROFILE ──
+  document.getElementById("profileCard").style.display = "flex";
+  const nameRaw = localStorage.getItem("userName") || email.split("@")[0];
+  const name = nameRaw.charAt(0).toUpperCase() + nameRaw.slice(1);
+  document.getElementById("userName").innerText = name;
+  document.getElementById("userEmail").innerText = "✉️ " + email;
+  document.getElementById("userAvatar").innerText = name.charAt(0).toUpperCase();
+  const joined = localStorage.getItem("joinedDate") || new Date().toLocaleDateString("en-IN",{month:"long",year:"numeric"});
+  document.getElementById("memberSince").innerText = "📅 Member since " + joined;
+
+  // ── LOAD RIDES ──
   const historyKey = "rideHistory_" + email;
-  const rides = JSON.parse(localStorage.getItem(historyKey)) || [];
+  let rides = JSON.parse(localStorage.getItem(historyKey)) || [];
 
-  if (rides.length === 0) {
-    activityList.innerHTML = `<div class="empty">🛺 No rides yet</div>`;
-  } else {
+  // Try backend too
+  if (userId) {
+    fetch("http://localhost:5000/api/rides/user/" + userId)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const br = data.map(r => ({
+            pickup:r.pickup, drop:r.drop, fare:r.fare,
+            distance:r.distance, status:"Completed", paymentMode:r.paymentMode||"Cash",
+            time:new Date(r.completedAt||r.createdAt).toLocaleString("en-IN"),
+            id:r._id
+          }));
+          rides = [...br, ...rides];
+          renderAll(rides);
+        }
+      }).catch(()=>{});
+  }
 
-    let totalKM = 0;
-    let validRides = 0;
+  renderAll(rides);
 
-    rides.forEach(ride => {
+  function renderAll(ridesArr) {
+    activityList.innerHTML = "";
+    allCards = [];
+
+    if (!ridesArr.length) {
+      activityList.innerHTML = `<div class="empty"><div class="empty-icon">🛺</div>
+        <h3>No Rides Yet!</h3><p>Book your first auto ride today</p>
+        <a href="booking.html" class="empty-btn">Book a Ride 🛺</a></div>`;
+      updateStats(0, 0, 0, 0, 0);
+      return;
+    }
+
+    let totalKM=0, validRides=0, totalSpent=0, totalRating=0, ratingCount=0;
+
+    ridesArr.forEach((ride, idx) => {
+      const reviewKey = `review_${email}_${idx}`;
+      const saved = (() => { try { return JSON.parse(localStorage.getItem(reviewKey)); } catch(e){ return null; } })();
+      if (saved && saved.rating) { totalRating += saved.rating; ratingCount++; }
 
       const card = document.createElement("div");
+      card.style.animationDelay = (idx * 0.06) + "s";
 
-      // ❌ CANCELLED RIDE
+      // ── CANCELLED ──
       if (ride.status === "Cancelled") {
-        card.className = "card cancelled";
+        card.className = "ride-card cancelled-card";
+        card.setAttribute("data-status","cancelled");
         card.innerHTML = `
-          <div class="icon">❌</div>
-          <h3>Ride Cancelled</h3>
-          <p><strong>${ride.pickup} → ${ride.drop}</strong></p>
-          <p>Fare: ₹${ride.fare}</p>
-          <p>${ride.time}</p>
-        `;
+          <div class="card-top">
+            <div class="card-status status-cancelled">❌ Cancelled</div>
+            <div class="card-icon">🚫</div>
+            <div class="card-title">Ride Cancelled</div>
+            <div class="card-sub">${ride.time||"—"}</div>
+            <div class="route-display">
+              <div class="route-point"><div class="route-label">From</div><div class="route-name">📍 ${ride.pickup||"—"}</div></div>
+              <div class="route-arrow">→</div>
+              <div class="route-point"><div class="route-label">To</div><div class="route-name">🏁 ${ride.drop||"—"}</div></div>
+            </div>
+          </div>
+          <div class="card-bottom">
+            <div class="card-meta">
+              <div class="meta-item">💸 Fare: <span>₹${ride.fare}</span></div>
+              <div class="meta-item">ℹ️ <span>No charge applied</span></div>
+            </div>
+          </div>`;
         activityList.appendChild(card);
+        allCards.push(card);
         return;
       }
 
-      // ✅ NORMAL RIDE
-      const distance = (ride.fare / 25).toFixed(1);
-      totalKM += Number(distance);
+      // ── COMPLETED ──
+      const dist = ride.distance ? parseFloat(ride.distance).toFixed(1) : (ride.fare/25).toFixed(1);
+      totalKM += Number(dist);
       validRides++;
+      totalSpent += Number(ride.fare);
+      const progW = Math.min(Number(dist)*8, 100);
+      const dName = DRIVERS[idx % DRIVERS.length];
+      const dRating = driverRatings[idx % driverRatings.length];
 
-      card.className = "card";
+      card.className = "ride-card";
+      card.setAttribute("data-status","completed");
       card.innerHTML = `
-        <div class="icon">🛺</div>
-        <h3>Auto Ride</h3>
-        <p>${distance} KM • ₹${ride.fare}</p>
-        <p>${ride.time}</p>
-        <div class="progress">
-          <div style="width:${Math.min(distance * 8, 100)}%"></div>
+        <div class="card-top">
+          <div class="card-status status-completed">✅ Completed</div>
+          <div class="card-icon">🛺</div>
+          <div class="card-title">Auto Ride</div>
+          <div class="card-sub">${ride.time||"—"}</div>
+          <div class="route-display">
+            <div class="route-point"><div class="route-label">Pickup</div><div class="route-name">📍 ${ride.pickup||"—"}</div></div>
+            <div class="route-arrow">→</div>
+            <div class="route-point"><div class="route-label">Drop</div><div class="route-name">🏁 ${ride.drop||"—"}</div></div>
+          </div>
         </div>
-      `;
+        <div class="card-bottom">
+          <div class="driver-row">
+            <div class="driver-avatar">${dName.charAt(0)}</div>
+            <div class="driver-info">
+              <div class="driver-name">🚗 ${dName}</div>
+              <div class="driver-sub">Your Driver</div>
+            </div>
+            <div class="driver-rating">⭐ ${dRating}</div>
+          </div>
+          <div class="card-meta">
+            <div class="meta-item">📍 <span>${dist} KM</span></div>
+            <div class="meta-item">💸 <span>₹${ride.fare}</span></div>
+            <div class="meta-item">💳 <span>${ride.paymentMode||"Cash"}</span></div>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-label"><span>Distance</span><span>${dist} km</span></div>
+            <div class="prog-bar"><div class="prog-fill" style="width:${progW}%"></div></div>
+          </div>
+        </div>
+        <div class="review-box" id="reviewBox_${idx}">
+          ${buildReviewHTML(idx, saved)}
+        </div>`;
+
       activityList.appendChild(card);
+      allCards.push(card);
     });
 
-    document.getElementById("totalRides").innerText = validRides;
-    document.getElementById("totalKM").innerText = totalKM.toFixed(1);
-    document.getElementById("points").innerText = validRides * 10;
+    updateStats(validRides, totalKM, totalSpent, validRides*10, ratingCount > 0 ? (totalRating/ratingCount) : null);
   }
+
+  function buildReviewHTML(idx, saved) {
+    if (saved && saved.rating) {
+      const stars = [1,2,3,4,5].map(s => `<span class="star ${s<=saved.rating?'filled':''}">${s<=saved.rating?'⭐':'☆'}</span>`).join('');
+      return `<div class="review-title">Your Review ✅</div>
+        <div class="stars-row">${stars}</div>
+        ${saved.comment ? `<div class="review-comment-display">"${saved.comment}"</div>` : ''}`;
+    }
+    return `<div class="review-title">Rate this ride</div>
+      <div class="stars-row" id="stars_${idx}">
+        ${[1,2,3,4,5].map(s=>`<span class="star" onclick="setRating(${idx},${s})" data-v="${s}">⭐</span>`).join('')}
+      </div>
+      <div class="review-input-area" id="reviewInput_${idx}">
+        <textarea placeholder="Share your experience (optional)..." id="reviewText_${idx}"></textarea>
+        <button class="review-submit" onclick="submitReview(${idx})">Submit Review 💬</button>
+      </div>`;
+  }
+
+  function updateStats(rides, km, spent, pts, avgRat) {
+    document.getElementById("totalRides").innerText = rides;
+    document.getElementById("totalKM").innerText = typeof km === 'number' ? km.toFixed(1) : km;
+    document.getElementById("totalSpent").innerText = "₹" + spent;
+    document.getElementById("loyaltyPts").innerText = pts;
+    document.getElementById("loyaltyDisplay").innerText = pts + " pts";
+    document.getElementById("avgRating").innerText = avgRat ? avgRat.toFixed(1) + " ⭐" : "—";
+
+    // Tier
+    const tb = document.getElementById("tierBadge");
+    const lm = document.getElementById("loyaltyMsg");
+    let fill = 0;
+    if (pts >= 150) {
+      tb.innerHTML = "🥇 Gold Rider"; tb.className = "badge badge-gold";
+      lm.innerText = "🎉 Gold Rider! Enjoy exclusive discounts on every ride!"; fill = 100;
+    } else if (pts >= 50) {
+      tb.innerHTML = "🥈 Silver Rider"; tb.className = "badge badge-silver";
+      lm.innerText = "🚀 Silver Rider — Priority booking unlocked!";
+      fill = 50 + ((pts-50)/100)*50;
+    } else {
+      tb.innerHTML = "🥉 Bronze Rider"; tb.className = "badge badge-bronze";
+      lm.innerText = `Earn ${50-pts} more points to reach Silver!`;
+      fill = (pts/50)*50;
+    }
+    setTimeout(() => { document.getElementById("loyaltyFill").style.width = Math.min(fill,100) + "%"; }, 300);
+  }
+
+  window.setRating = function(idx, val) {
+    const container = document.getElementById("stars_"+idx);
+    if (!container) return;
+    container.setAttribute("data-sel", val);
+    container.querySelectorAll(".star").forEach((s,i) => {
+      s.className = "star " + (i < val ? "filled" : "");
+    });
+    const inp = document.getElementById("reviewInput_"+idx);
+    if (inp) inp.style.display = "block";
+  };
+
+  window.submitReview = function(idx) {
+    const sc = document.getElementById("stars_"+idx);
+    const rating = parseInt(sc ? sc.getAttribute("data-sel")||"0" : "0");
+    if (!rating) { alert("Please select a star rating!"); return; }
+    const comment = (document.getElementById("reviewText_"+idx)||{}).value || "";
+    const reviewKey = `review_${email}_${idx}`;
+    localStorage.setItem(reviewKey, JSON.stringify({rating, comment: comment.trim()}));
+    const box = document.getElementById("reviewBox_"+idx);
+    if (box) {
+      const stars = [1,2,3,4,5].map(s=>`<span class="star ${s<=rating?'filled':''}">${s<=rating?'⭐':'☆'}</span>`).join('');
+      box.innerHTML = `<div class="review-title">Your Review ✅</div>
+        <div class="stars-row">${stars}</div>
+        ${comment.trim() ? `<div class="review-comment-display">"${comment.trim()}"</div>` : ''}`;
+    }
+  };
+
+  window.filterRides = function(type, el) {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+    allCards.forEach(card => {
+      const st = card.getAttribute("data-status");
+      card.style.display = (type==="all" || st===type) ? "" : "none";
+    });
+  };
 }
 </script>
-
 </body>
 </html>
-

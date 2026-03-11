@@ -27,6 +27,10 @@ router.get("/all", async (req, res) => {
 // ===============================
 router.get("/by-name/:name", async (req, res) => {
   try {
+    if (!req.params.name) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+
     const driver = await Driver.findOne({ name: req.params.name });
 
     if (!driver) {

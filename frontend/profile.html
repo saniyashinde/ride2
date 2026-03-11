@@ -2,266 +2,577 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profile | MoveMaster</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap');
-
+:root{
+  --blue:#0aa2e6; --blue-dark:#0880b8; --blue-light:#e0f5ff;
+  --teal:#00c9a7; --orange:#ff7043; --yellow:#ffd600;
+  --green:#2ecc71; --red:#f44336;
+  --text:#1a2340; --muted:#7a8aaa;
+  --bg:#f0f8ff; --card:#fff;
+  --shadow:0 8px 30px rgba(10,162,230,0.13);
+  --shadow-lg:0 16px 50px rgba(10,162,230,0.2);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
 body{
-  font-family:'Baloo 2', cursive;
-  margin:0;
-  padding-top:70px;
+  font-family:'Nunito',sans-serif;
+  background:var(--bg);
   min-height:100vh;
-  background:linear-gradient(135deg,#fdfbfb,#ebedee);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  padding-top:70px;
+  color:var(--text);
+  overflow-x:hidden;
 }
+body::before{content:'';position:fixed;top:-100px;right:-100px;width:380px;height:380px;
+  background:radial-gradient(circle,rgba(10,162,230,0.13),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-80px;left:-80px;width:320px;height:320px;
+  background:radial-gradient(circle,rgba(0,201,167,0.11),transparent 70%);border-radius:50%;pointer-events:none;z-index:0;}
 
-/* NAVBAR */
+/* ── NAVBAR ── */
 .navbar{
-  width:100%;
-  background:#fff;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 30px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.15);
-  position:fixed;
-  top:0;
-  z-index:10;
+  position:fixed;top:0;left:0;width:100%;height:66px;z-index:999;
+  background:rgba(255,255,255,0.97);backdrop-filter:blur(14px);
+  display:flex;align-items:center;justify-content:space-between;padding:0 32px;
+  box-shadow:0 4px 24px rgba(10,162,230,0.12);
+  border-bottom:2px solid rgba(10,162,230,0.07);
+}
+.nav-left{font-size:22px;font-weight:900;color:var(--blue);letter-spacing:-0.5px;}
+.nav-center{display:flex;gap:4px;}
+.nav-center a{text-decoration:none;color:#555;font-size:14px;font-weight:700;
+  padding:7px 14px;border-radius:30px;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.nav-center a:hover,.nav-center a.active{background:var(--blue-light);color:var(--blue);}
+.nav-right{background:var(--blue);color:#fff;padding:8px 16px;border-radius:22px;
+  font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px;}
+
+/* ── PAGE LAYOUT ── */
+.page{
+  width:92%;max-width:960px;margin:0 auto;
+  padding:30px 0 50px;
+  position:relative;z-index:1;
 }
 
-.nav-left{
-  font-size:20px;
-  font-weight:600;
-  color:#0aa2e6;
+/* ── PROFILE HERO CARD ── */
+.hero-card{
+  background:linear-gradient(135deg,#0aa2e6 0%,#00c9a7 100%);
+  border-radius:28px;padding:36px 36px 60px;
+  position:relative;overflow:hidden;margin-bottom:-48px;
+  box-shadow:0 16px 48px rgba(10,162,230,0.28);
+}
+.hero-card::before{content:'👤';font-size:180px;position:absolute;right:-20px;top:-20px;
+  opacity:0.07;line-height:1;pointer-events:none;}
+.hero-card::after{content:'';position:absolute;bottom:-40px;left:-40px;width:180px;height:180px;
+  background:rgba(255,255,255,0.08);border-radius:50%;}
+
+.hero-top{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+.avatar-wrap{position:relative;flex-shrink:0;}
+.avatar-circle{
+  width:88px;height:88px;border-radius:50%;
+  background:rgba(255,255,255,0.25);
+  border:3px solid rgba(255,255,255,0.5);
+  display:flex;align-items:center;justify-content:center;
+  font-size:36px;font-weight:900;color:#fff;
+  font-family:'Poppins',sans-serif;
+  box-shadow:0 6px 20px rgba(0,0,0,0.15);
+  position:relative;z-index:1;
+}
+.avatar-status{
+  position:absolute;bottom:4px;right:4px;
+  width:18px;height:18px;background:var(--green);
+  border-radius:50%;border:2px solid #fff;z-index:2;
+}
+.hero-info{flex:1;}
+.hero-name{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;color:#fff;margin-bottom:4px;}
+.hero-email{font-size:14px;color:rgba(255,255,255,0.8);font-weight:600;margin-bottom:8px;}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap;}
+.hbadge{background:rgba(255,255,255,0.2);color:#fff;padding:5px 12px;border-radius:20px;
+  font-size:12px;font-weight:700;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.25);}
+.hbadge.gold{background:rgba(255,214,0,0.3);border-color:rgba(255,214,0,0.5);}
+
+/* ── WHITE SECTION ── */
+.white-section{
+  background:var(--card);border-radius:0 0 28px 28px;
+  padding:64px 32px 32px;
+  box-shadow:var(--shadow-lg);
+  margin-bottom:24px;
 }
 
-.nav-center a{
-  margin:0 15px;
-  text-decoration:none;
-  color:#333;
+/* ── STATS ROW ── */
+.stats-row{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;
+  margin-bottom:28px;
 }
-.nav-center a:hover{color:#0aa2e6}
+.stat-mini{
+  background:var(--bg);border-radius:16px;padding:16px 12px;text-align:center;
+  border:2px solid transparent;transition:all .2s;cursor:default;
+}
+.stat-mini:hover{border-color:var(--blue);background:var(--blue-light);}
+.stat-mini .sicon{font-size:22px;margin-bottom:4px;}
+.stat-mini .snum{font-size:22px;font-weight:900;color:var(--blue);font-family:'Poppins',sans-serif;line-height:1;}
+.stat-mini .snum.teal{color:var(--teal);}
+.stat-mini .snum.orange{color:var(--orange);}
+.stat-mini .snum.purple{color:#9c27b0;}
+.stat-mini .slabel{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px;}
 
-.nav-right{
-  background:#0aa2e6;
-  color:#fff;
-  padding:6px 14px;
-  border-radius:20px;
-  font-size:14px;
+/* ── INFO GRID ── */
+.info-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;
+}
+.info-item{
+  background:var(--bg);border-radius:16px;padding:16px 18px;
+  border:2px solid transparent;transition:all .2s;
+}
+.info-item:hover{border-color:rgba(10,162,230,0.2);background:var(--blue-light);}
+.info-label{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:5px;}
+.info-value{font-size:15px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:7px;}
+.info-value.empty{color:#c0ccd8;font-style:italic;font-weight:600;}
+
+/* ── EDIT BUTTON ── */
+.edit-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--blue),var(--teal));
+  border:none;border-radius:14px;color:#fff;
+  font-size:15px;font-weight:800;font-family:'Nunito',sans-serif;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 6px 20px rgba(10,162,230,0.3);
+}
+.edit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(10,162,230,0.4);}
+
+/* ── EDIT FORM CARD ── */
+.edit-card{
+  background:var(--card);border-radius:24px;padding:28px 32px;
+  box-shadow:var(--shadow-lg);margin-top:20px;
+  display:none;
+  animation:fadeUp .4s ease;
+}
+.edit-card.open{display:block;}
+.edit-card-title{font-size:18px;font-weight:900;color:var(--text);margin-bottom:20px;
+  display:flex;align-items:center;gap:8px;}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.flabel{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;}
+.finput{
+  padding:12px 14px;border-radius:12px;
+  border:2px solid rgba(10,162,230,0.15);
+  font-size:14px;font-family:'Nunito',sans-serif;font-weight:600;
+  color:var(--text);outline:none;transition:all .2s;background:#fff;
+}
+.finput:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(10,162,230,0.1);}
+.finput::placeholder{color:#c0ccd8;}
+
+/* GENDER RADIO */
+.gender-row{display:flex;gap:10px;flex-wrap:wrap;}
+.gender-opt{
+  display:flex;align-items:center;gap:6px;
+  padding:9px 16px;border-radius:30px;cursor:pointer;
+  border:2px solid rgba(10,162,230,0.15);background:#fff;
+  font-size:13px;font-weight:700;color:var(--muted);
+  transition:all .2s;user-select:none;
+}
+.gender-opt input{display:none;}
+.gender-opt.selected, .gender-opt:has(input:checked){
+  background:var(--blue-light);border-color:var(--blue);color:var(--blue);
 }
 
-/* CARD */
-.card{
-  background:#fff;
-  width:420px;
-  border-radius:20px;
-  padding:30px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.15);
-  text-align:center;
-  margin-top:60px;
-  animation: fadeIn 0.8s ease;
-}
+/* AVATAR PICKER */
+.avatar-picker{display:flex;gap:10px;flex-wrap:wrap;}
+.av-opt{font-size:28px;cursor:pointer;padding:8px;border-radius:12px;border:2px solid transparent;
+  transition:all .2s;background:var(--bg);}
+.av-opt:hover{background:var(--blue-light);}
+.av-opt.picked{border-color:var(--blue);background:var(--blue-light);}
 
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
+/* SAVE BUTTON */
+.save-btn{
+  width:100%;padding:14px;margin-top:6px;
+  background:linear-gradient(135deg,var(--blue),var(--teal));
+  border:none;border-radius:14px;color:#fff;
+  font-size:15px;font-weight:800;font-family:'Nunito',sans-serif;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 6px 18px rgba(10,162,230,0.28);
 }
+.save-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(10,162,230,0.38);}
 
-.profile-pic{
-  width:100px;
-  height:100px;
-  border-radius:50%;
-  background:#0aa2e6;
-  color:#27c6fb;
-  font-size:40px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  margin:0 auto 15px;
+/* DANGER ZONE */
+.danger-card{
+  background:#fff5f5;border-radius:20px;padding:20px 24px;
+  border:2px solid #ffcdd2;margin-top:20px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
 }
+.danger-info h4{font-size:15px;font-weight:800;color:var(--red);margin-bottom:3px;}
+.danger-info p{font-size:13px;color:#c0747a;font-weight:600;}
+.logout-btn{
+  padding:10px 22px;background:var(--red);color:#fff;border:none;
+  border-radius:30px;font-size:14px;font-weight:700;cursor:pointer;
+  font-family:'Nunito',sans-serif;transition:all .2s;
+}
+.logout-btn:hover{background:#c62828;transform:scale(1.04);}
 
-h2{margin:0;color:#0aa2e6}
+/* TOAST */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);
+  background:#1a2340;color:#fff;padding:12px 24px;border-radius:30px;
+  font-size:14px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,0.2);
+  display:none;z-index:9999;}
 
-.info{
-  text-align:left;
-  margin-top:20px;
-}
-.info p{
-  margin:8px 0;
-  color:#555;
-}
-.info span{
-  font-weight:bold;
-  color:#0aa2e6;
-}
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 
-button{
-  margin-top:20px;
-  padding:10px 20px;
-  background:#0aa2e6;
-  color:#fff;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-}
-button:hover{background:#088ac7}
-
-.form-group{margin:10px 0}
-input{
-  width:100%;
-  padding:8px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-.gender{
-  display:flex;
-  gap:10px;
-  justify-content:center;
+/* RESPONSIVE */
+@media(max-width:600px){
+  .info-grid,.form-grid{grid-template-columns:1fr;}
+  .form-group.full{grid-column:1;}
+  .navbar{padding:0 14px;}
+  .hero-card{padding:28px 22px 60px;}
+  .white-section{padding:60px 20px 24px;}
+  .edit-card{padding:22px 18px;}
+  .nav-center a{padding:6px 10px;font-size:12px;}
 }
 </style>
 </head>
-
 <body>
 
 <!-- NAVBAR -->
 <div class="navbar">
   <div class="nav-left">🛺 MoveMaster</div>
-
   <div class="nav-center">
     <a href="booking.html">🏠 Home</a>
     <a href="services.html">🛺 Services</a>
     <a href="activity.html">📊 Activity</a>
     <a href="help.html">🆘 Help</a>
   </div>
-
-  <!-- 🔥 USER NAME HERE -->
-  <div class="nav-right" id="navUser">-</div>
+  <div class="nav-right" id="navUser">👤 —</div>
 </div>
 
-<!-- PROFILE CARD -->
-<div class="card">
-  <div class="profile-pic">👤</div>
-  <h2 id="userName">-</h2>
+<div class="page">
 
-  <div class="info">
-    <p>Email: <span id="email">-</span></p>
-    <p>Gender: <span id="gender">-</span></p>
-    <p>Age: <span id="age">-</span></p>
-    <p>Phone: <span id="phone">-</span></p>
+  <!-- HERO CARD -->
+  <div class="hero-card">
+    <div class="hero-top">
+      <div class="avatar-wrap">
+        <div class="avatar-circle" id="heroPic">👤</div>
+        <div class="avatar-status"></div>
+      </div>
+      <div class="hero-info">
+        <div class="hero-name" id="heroName">—</div>
+        <div class="hero-email" id="heroEmail">—</div>
+        <div class="hero-badges">
+          <span class="hbadge" id="tierHBadge">🥉 Bronze Rider</span>
+          <span class="hbadge" id="memberBadge">📅 Member</span>
+          <span class="hbadge gold" id="pointsBadge">🏆 0 pts</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <button onclick="openForm()">✏️ Add / Edit Profile</button>
+  <!-- WHITE SECTION: stats + info -->
+  <div class="white-section">
 
-  <div id="formBox" style="display:none;margin-top:20px;">
-    <div class="form-group">
-      <input id="nameInput" placeholder="Enter Name">
+    <!-- QUICK STATS -->
+    <div class="stats-row">
+      <div class="stat-mini">
+        <div class="sicon">🛺</div>
+        <div class="snum" id="statRides">0</div>
+        <div class="slabel">Total Rides</div>
+      </div>
+      <div class="stat-mini">
+        <div class="sicon">📍</div>
+        <div class="snum teal" id="statKM">0</div>
+        <div class="slabel">KM Travelled</div>
+      </div>
+      <div class="stat-mini">
+        <div class="sicon">💸</div>
+        <div class="snum orange" id="statSpent">₹0</div>
+        <div class="slabel">Total Spent</div>
+      </div>
+      <div class="stat-mini">
+        <div class="sicon">🏆</div>
+        <div class="snum purple" id="statPts">0</div>
+        <div class="slabel">Loyalty Pts</div>
+      </div>
     </div>
-    <div class="form-group">
-      <input id="ageInput" type="number" placeholder="Enter Age">
+
+    <!-- INFO GRID -->
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">👤 Full Name</div>
+        <div class="info-value" id="dispName">—</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">✉️ Email</div>
+        <div class="info-value" id="dispEmail">—</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">📞 Phone</div>
+        <div class="info-value" id="dispPhone"><span class="empty">Not added</span></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">🎂 Age</div>
+        <div class="info-value" id="dispAge"><span class="empty">Not added</span></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">⚤ Gender</div>
+        <div class="info-value" id="dispGender"><span class="empty">Not added</span></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">🏠 City</div>
+        <div class="info-value" id="dispCity"><span class="empty">Not added</span></div>
+      </div>
     </div>
-    <div class="form-group gender">
-      <label><input type="radio" name="gender" value="Male"> Male</label>
-      <label><input type="radio" name="gender" value="Female"> Female</label>
-      <label><input type="radio" name="gender" value="Other"> Other</label>
-    </div>
-    <div class="form-group">
-      <input id="phoneInput" placeholder="Enter Phone">
-    </div>
-    <button onclick="saveProfile()">💾 Save</button>
+
+    <!-- EDIT TRIGGER -->
+    <button class="edit-btn" onclick="toggleForm()">✏️ Edit Profile</button>
   </div>
+
+  <!-- EDIT FORM CARD -->
+  <div class="edit-card" id="editCard">
+    <div class="edit-card-title">✏️ Edit Your Profile</div>
+
+    <!-- AVATAR PICKER -->
+    <div class="form-group full" style="margin-bottom:18px;">
+      <div class="flabel">Choose Avatar</div>
+      <div class="avatar-picker" id="avatarPicker">
+        <div class="av-opt" onclick="pickAvatar(this,'👦')">👦</div>
+        <div class="av-opt" onclick="pickAvatar(this,'👧')">👧</div>
+        <div class="av-opt" onclick="pickAvatar(this,'🧔')">🧔</div>
+        <div class="av-opt" onclick="pickAvatar(this,'👩')">👩</div>
+        <div class="av-opt" onclick="pickAvatar(this,'🧑')">🧑</div>
+        <div class="av-opt" onclick="pickAvatar(this,'👴')">👴</div>
+        <div class="av-opt" onclick="pickAvatar(this,'👵')">👵</div>
+        <div class="av-opt" onclick="pickAvatar(this,'🦸')">🦸</div>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <div class="flabel">Full Name</div>
+        <input class="finput" id="nameInput" placeholder="Your full name">
+      </div>
+      <div class="form-group">
+        <div class="flabel">Age</div>
+        <input class="finput" id="ageInput" type="number" placeholder="Your age" min="5" max="100">
+      </div>
+      <div class="form-group">
+        <div class="flabel">Phone Number</div>
+        <input class="finput" id="phoneInput" placeholder="+91 00000 00000" maxlength="13">
+      </div>
+      <div class="form-group">
+        <div class="flabel">City</div>
+        <input class="finput" id="cityInput" placeholder="Your city">
+      </div>
+      <div class="form-group full">
+        <div class="flabel">Gender</div>
+        <div class="gender-row">
+          <label class="gender-opt" id="gMale"><input type="radio" name="gender" value="Male"> 👨 Male</label>
+          <label class="gender-opt" id="gFemale"><input type="radio" name="gender" value="Female"> 👩 Female</label>
+          <label class="gender-opt" id="gOther"><input type="radio" name="gender" value="Other"> 🧑 Other</label>
+        </div>
+      </div>
+    </div>
+
+    <button class="save-btn" onclick="saveProfile()">💾 Save Profile</button>
+  </div>
+
+  <!-- DANGER ZONE -->
+  <div class="danger-card">
+    <div class="danger-info">
+      <h4>🚪 Logout</h4>
+      <p>You will be redirected to the login page</p>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout 🚪</button>
+  </div>
+
 </div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
 <script>
-const userName = document.getElementById("userName");
-const emailSpan = document.getElementById("email");
-const genderSpan = document.getElementById("gender");
-const ageSpan = document.getElementById("age");
-const phoneSpan = document.getElementById("phone");
-const navUser = document.getElementById("navUser");
-
-const nameInput = document.getElementById("nameInput");
-const ageInput = document.getElementById("ageInput");
-const phoneInput = document.getElementById("phoneInput");
-const formBox = document.getElementById("formBox");
-
-/* 🔐 LOGIN CHECK (FIXED) */
-const googleUser = JSON.parse(localStorage.getItem("loggedInUser"));
-const normalEmail = localStorage.getItem("loggedInEmail");
-
+// ── GET CURRENT USER ──
+const googleUser = (() => { try { return JSON.parse(localStorage.getItem("loggedInUser")); } catch(e) { return null; } })();
+const normalEmail = localStorage.getItem("loggedInEmail") || localStorage.getItem("userEmail");
 const currentEmail = googleUser?.email || normalEmail;
 
 if (!currentEmail) {
   alert("Please login first");
-  window.location.href = "signup.html";
+  window.location.href = "login.html";
 }
 
-/* LOAD PROFILE */
-function loadProfile(){
-  const profile = JSON.parse(localStorage.getItem("profile_" + currentEmail)) || {};
-
-  const displayName =
-    profile.name ||
-    googleUser?.name ||
-    currentEmail;
-
-  userName.textContent = displayName;
-  emailSpan.textContent = currentEmail;
-  genderSpan.textContent = profile.gender || "-";
-  ageSpan.textContent = profile.age || "-";
-  phoneSpan.textContent = profile.phone || "-";
+// ── TOAST ──
+function showToast(msg, dur=2600) {
+  const t = document.getElementById("toast");
+  t.innerText = msg; t.style.display = "block";
+  setTimeout(() => t.style.display = "none", dur);
 }
 
-/* LOAD NAVBAR USER */
-function loadNavbarUser(){
-  const profile = JSON.parse(localStorage.getItem("profile_" + currentEmail)) || {};
-  const displayName =
-    profile.name ||
-    googleUser?.name ||
-    currentEmail;
+// ── LOAD STATS FROM RIDE HISTORY ──
+function loadStats() {
+  const histKey = "rideHistory_" + currentEmail;
+  const rides = JSON.parse(localStorage.getItem(histKey)) || [];
+  let validRides = 0, totalKM = 0, totalSpent = 0;
+  rides.forEach(r => {
+    if (r.status !== "Cancelled") {
+      validRides++;
+      const d = r.distance ? parseFloat(r.distance) : (r.fare / 25);
+      totalKM += d;
+      totalSpent += Number(r.fare || 0);
+    }
+  });
+  const pts = validRides * 10;
+  document.getElementById("statRides").innerText = validRides;
+  document.getElementById("statKM").innerText = totalKM.toFixed(1);
+  document.getElementById("statSpent").innerText = "₹" + totalSpent;
+  document.getElementById("statPts").innerText = pts;
+  document.getElementById("pointsBadge").innerText = "🏆 " + pts + " pts";
 
-  navUser.textContent = displayName;
+  // Tier badge
+  const tb = document.getElementById("tierHBadge");
+  if (pts >= 150) { tb.innerText = "🥇 Gold Rider"; tb.className = "hbadge gold"; }
+  else if (pts >= 50) { tb.innerText = "🥈 Silver Rider"; }
+  else { tb.innerText = "🥉 Bronze Rider"; }
 }
 
-/* OPEN FORM */
-function openForm(){
-  formBox.style.display = "block";
+// ── LOAD PROFILE ──
+function loadProfile() {
   const profile = JSON.parse(localStorage.getItem("profile_" + currentEmail)) || {};
 
-  nameInput.value = profile.name || googleUser?.name || "";
-  ageInput.value = profile.age || "";
-  phoneInput.value = profile.phone || "";
+  // Auto-fill name from signup/google if not manually set yet
+  const autoName = googleUser?.name
+    || localStorage.getItem("userName")
+    || currentEmail.split("@")[0];
 
-  if(profile.gender){
-    document.querySelector(`input[value="${profile.gender}"]`).checked = true;
+  const displayName = profile.name || autoName;
+  const namePretty = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+
+  // HERO
+  document.getElementById("heroName").innerText = namePretty;
+  document.getElementById("heroEmail").innerText = "✉️ " + currentEmail;
+  document.getElementById("heroPic").innerText = profile.avatar || namePretty.charAt(0).toUpperCase();
+
+  // Member since
+  const joined = localStorage.getItem("joinedDate") || new Date().toLocaleDateString("en-IN",{month:"short",year:"numeric"});
+  document.getElementById("memberBadge").innerText = "📅 Since " + joined;
+
+  // Navbar
+  document.getElementById("navUser").innerText = "👤 " + namePretty;
+
+  // INFO GRID
+  setInfo("dispName", displayName, "👤 " + namePretty);
+  setInfo("dispEmail", currentEmail, "✉️ " + currentEmail);
+  setInfo("dispPhone", profile.phone, "📞 " + profile.phone);
+  setInfo("dispAge", profile.age, "🎂 " + profile.age + " yrs");
+  setInfo("dispGender", profile.gender, genderIcon(profile.gender) + " " + profile.gender);
+  setInfo("dispCity", profile.city, "🏙️ " + profile.city);
+
+  loadStats();
+}
+
+function setInfo(id, val, display) {
+  const el = document.getElementById(id);
+  if (val) {
+    el.innerHTML = display;
+    el.className = "info-value";
+  } else {
+    el.innerHTML = '<span class="empty">Not added</span>';
+    el.className = "info-value empty";
   }
 }
 
-/* SAVE PROFILE */
-function saveProfile(){
-  const genderVal = document.querySelector('input[name="gender"]:checked');
-
-  const profileData = {
-    name: nameInput.value.trim(),
-    age: ageInput.value.trim(),
-    phone: phoneInput.value.trim(),
-    gender: genderVal ? genderVal.value : ""
-  };
-
-  localStorage.setItem("profile_" + currentEmail, JSON.stringify(profileData));
-
-  loadProfile();
-  loadNavbarUser();
-  formBox.style.display = "none";
+function genderIcon(g) {
+  if (g === "Male") return "👨";
+  if (g === "Female") return "👩";
+  return "🧑";
 }
 
-/* PAGE LOAD */
-window.onload = () => {
-  loadProfile();
-  loadNavbarUser();
-};
-</script>
+// ── TOGGLE EDIT FORM ──
+let formOpen = false;
+function toggleForm() {
+  formOpen = !formOpen;
+  const card = document.getElementById("editCard");
+  card.classList.toggle("open", formOpen);
 
+  if (formOpen) {
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
+    prefillForm();
+  }
+}
+
+// ── PRE-FILL FORM WITH EXISTING DATA ──
+function prefillForm() {
+  const profile = JSON.parse(localStorage.getItem("profile_" + currentEmail)) || {};
+  const autoName = googleUser?.name || localStorage.getItem("userName") || currentEmail.split("@")[0];
+
+  document.getElementById("nameInput").value  = profile.name || autoName || "";
+  document.getElementById("ageInput").value   = profile.age || "";
+  document.getElementById("phoneInput").value = profile.phone || "";
+  document.getElementById("cityInput").value  = profile.city || "";
+
+  if (profile.gender) {
+    const radio = document.querySelector(`input[name="gender"][value="${profile.gender}"]`);
+    if (radio) radio.checked = true;
+    highlightGender();
+  }
+
+  if (profile.avatar) {
+    document.querySelectorAll(".av-opt").forEach(el => {
+      el.classList.toggle("picked", el.textContent.trim() === profile.avatar);
+    });
+  }
+}
+
+// ── AVATAR PICKER ──
+let pickedAvatar = null;
+function pickAvatar(el, emoji) {
+  document.querySelectorAll(".av-opt").forEach(e => e.classList.remove("picked"));
+  el.classList.add("picked");
+  pickedAvatar = emoji;
+}
+
+// ── GENDER HIGHLIGHT ──
+function highlightGender() {
+  document.querySelectorAll(".gender-opt").forEach(opt => {
+    const radio = opt.querySelector("input[type=radio]");
+    opt.classList.toggle("selected", radio && radio.checked);
+  });
+}
+document.querySelectorAll('input[name="gender"]').forEach(r => r.addEventListener("change", highlightGender));
+
+// ── SAVE PROFILE ──
+function saveProfile() {
+  const name    = document.getElementById("nameInput").value.trim();
+  const age     = document.getElementById("ageInput").value.trim();
+  const phone   = document.getElementById("phoneInput").value.trim();
+  const city    = document.getElementById("cityInput").value.trim();
+  const genderEl = document.querySelector('input[name="gender"]:checked');
+
+  if (!name) { showToast("⚠️ Please enter your name!"); return; }
+  if (phone && !/^[\d\+\-\s]{7,13}$/.test(phone)) { showToast("⚠️ Enter a valid phone number!"); return; }
+
+  const profile = {
+    name, age, phone, city,
+    gender: genderEl ? genderEl.value : "",
+    avatar: pickedAvatar || (JSON.parse(localStorage.getItem("profile_"+currentEmail))||{}).avatar || ""
+  };
+
+  localStorage.setItem("profile_" + currentEmail, JSON.stringify(profile));
+  // Also update userName so other pages get it
+  localStorage.setItem("userName", name);
+
+  loadProfile();
+  document.getElementById("editCard").classList.remove("open");
+  formOpen = false;
+  showToast("✅ Profile saved successfully!");
+}
+
+// ── LOGOUT ──
+function logout() {
+  localStorage.clear();
+  window.location.href = "login.html";
+}
+
+// ── INIT ──
+window.onload = loadProfile;
+</script>
 </body>
 </html>

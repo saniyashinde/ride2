@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/user");
+const User = require("../models/User");
 const bcrypt = require("bcrypt");
 
 // ---------------- SIGNUP ----------------
@@ -28,18 +28,31 @@ router.post("/signup", async (req, res) => {
 // ---------------- LOGIN ----------------
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
-  if (!user) return res.json({ message: "Invalid email or password" });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
 
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.json({ message: "Invalid email or password" });
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "Invalid email or password" });
 
-  req.session.userId = user._id;
-  req.session.userEmail = user.email;
+    if (!user.password) {
+      return res.status(400).json({ message: "Please login with Google" });
+    }
 
-  res.json({ success: true });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ message: "Invalid email or password" });
+
+    req.session.userId = user._id;
+    req.session.userEmail = user.email;
+
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error("Login error in authRoutes:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 // ---------------- LOGOUT ----------------

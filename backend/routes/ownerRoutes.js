@@ -96,8 +96,8 @@ router.get("/active-rides", async (req, res) => {
     const rides = await Ride.find({
       status: { $in: ["pending", "ongoing"] }
     })
-    .populate("userId", "email")
-    .populate("driverId", "name");
+      .populate("userId", "email")
+      .populate("driverId", "name");
 
     res.json(rides);
 

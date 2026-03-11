@@ -2,51 +2,182 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Driver Login | MoveMaster</title>
 <style>
-body {display:flex;justify-content:center;align-items:center;height:100vh;font-family:'Segoe UI';background:linear-gradient(135deg,#42d1f5,#0aa2e6);margin:0;}
-.login-box {background:#fff;padding:30px 40px;border-radius:15px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.3);width:350px;}
-input,button {width:90%;padding:12px;margin:10px 0;border-radius:8px;border:1px solid #ccc;font-size:16px;}
-button {background:#0aa2e6;color:white;border:none;cursor:pointer;transition:0.3s;}
-button:hover {opacity:0.9;}
-.msg {font-size:14px;color:red;min-height:18px;}
-h2 {margin-bottom:20px;color:#088ac7;}
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Baloo 2', cursive;
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  background: #0d1b2a;
+  position: relative; overflow: hidden;
+}
+.blob { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; animation: float 8s ease-in-out infinite; }
+.blob-1 { width: 500px; height: 500px; background: rgba(10,162,230,0.18); top: -150px; left: -150px; }
+.blob-2 { width: 400px; height: 400px; background: rgba(34,204,136,0.12); bottom: -100px; right: -100px; animation-delay: 3s; }
+.blob-3 { width: 300px; height: 300px; background: rgba(255,140,0,0.08); top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: 5s; }
+@keyframes float { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-30px) scale(1.05)} }
+body::before {
+  content: ''; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(10,162,230,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(10,162,230,0.04) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none;
+}
+.card {
+  position: relative; z-index: 10;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 28px; padding: 44px 40px; width: 400px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06) inset;
+  animation: slideUp 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(40px) scale(0.95)} to{opacity:1;transform:translateY(0) scale(1)} }
+.logo-wrap { text-align: center; margin-bottom: 28px; }
+.rickshaw-icon { font-size: 56px; display: inline-block; animation: rock 2.5s ease-in-out infinite; filter: drop-shadow(0 8px 16px rgba(10,162,230,0.4)); }
+@keyframes rock { 0%,100%{transform:rotate(-4deg) translateY(0)} 50%{transform:rotate(4deg) translateY(-6px)} }
+.brand { font-size: 26px; font-weight: 800; color: #fff; margin-top: 8px; }
+.brand span { color: #0aa2e6; }
+.tagline { font-size: 13px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+.divider { height: 1px; background: linear-gradient(90deg,transparent,rgba(10,162,230,0.4),transparent); margin: 20px 0; }
+.input-group { margin-bottom: 16px; }
+.input-group label { display: block; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
+.input-wrap { position: relative; }
+.input-wrap .icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 18px; pointer-events: none; }
+.input-wrap input {
+  width: 100%; padding: 13px 16px 13px 44px;
+  background: rgba(255,255,255,0.07); border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 14px; font-size: 15px; font-family: 'Baloo 2', cursive;
+  font-weight: 500; color: #fff; transition: all 0.2s; outline: none;
+}
+.input-wrap input::placeholder { color: rgba(255,255,255,0.3); }
+.input-wrap input:focus { border-color: #0aa2e6; background: rgba(10,162,230,0.08); box-shadow: 0 0 0 3px rgba(10,162,230,0.15); }
+.code-hint {
+  background: rgba(255,140,0,0.1); border: 1px solid rgba(255,140,0,0.25);
+  border-radius: 10px; padding: 10px 14px; font-size: 13px;
+  color: rgba(255,255,255,0.6); margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.code-hint b { color: #ffb347; font-size: 15px; }
+.btn-login {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #0aa2e6, #0077b6);
+  color: #fff; border: none; border-radius: 14px;
+  font-size: 16px; font-weight: 700; font-family: 'Baloo 2', cursive;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 6px 24px rgba(10,162,230,0.35);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-login:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(10,162,230,0.45); }
+.btn-login:disabled { background: rgba(255,255,255,0.1); cursor: not-allowed; box-shadow: none; }
+#msg { min-height: 22px; text-align: center; font-size: 14px; font-weight: 600; margin-top: 14px; border-radius: 8px; padding: 4px 0; }
+.msg-error { color: #ff6b6b; }
+.msg-success { color: #22cc88; }
+.msg-loading { color: #0aa2e6; animation: pulse 0.8s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.footer-note { text-align: center; margin-top: 22px; font-size: 12px; color: rgba(255,255,255,0.25); }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
 </style>
 </head>
 <body>
-<div class="login-box">
-  <h2>Driver Login</h2>
-  <input type="text" id="driverName" placeholder="Enter Your Name">
-  <input type="password" id="driverCode" placeholder="Enter Access Code">
-  <p class="msg" id="msg"></p>
-  <button onclick="loginDriver()">Login</button>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<div class="card">
+  <div class="logo-wrap">
+    <div class="rickshaw-icon">🛺</div>
+    <div class="brand">Move<span>Master</span></div>
+    <div class="tagline">Driver Portal — Mumbai</div>
+  </div>
+  <div class="divider"></div>
+  <div class="input-group">
+    <label>Your Name</label>
+    <div class="input-wrap">
+      <span class="icon">👤</span>
+      <input type="text" id="driverName" placeholder="Enter your registered name" onkeydown="if(event.key==='Enter') loginDriver()" autocomplete="off"/>
+    </div>
+  </div>
+  <div class="input-group">
+    <label>Access Code</label>
+    <div class="input-wrap">
+      <span class="icon">🔑</span>
+      <input type="password" id="driverCode" placeholder="Enter access code" onkeydown="if(event.key==='Enter') loginDriver()"/>
+    </div>
+  </div>
+  <div class="code-hint">🔐 Access Code: <b>MoveMaster2026</b></div>
+  <button class="btn-login" id="loginBtn" onclick="loginDriver()">
+    <span id="btnContent">🚀 Login to Dashboard</span>
+  </button>
+  <p id="msg"></p>
+  <div class="footer-note">Name must match exactly as registered by owner.<br>Contact owner if you face issues.</div>
 </div>
-
 <script>
-function loginDriver(){
+const BASE_URL = "http://localhost:5000";
+
+async function loginDriver() {
   const name = document.getElementById("driverName").value.trim();
   const code = document.getElementById("driverCode").value.trim();
   const msg = document.getElementById("msg");
+  const loginBtn = document.getElementById("loginBtn");
+  const btnContent = document.getElementById("btnContent");
 
-  if(!name || !code){
-    msg.innerText="All fields are required!";
+  msg.className = ""; msg.innerText = "";
+
+  if (!name || !code) {
+    msg.className = "msg-error";
+    msg.innerText = "⚠️ Please fill in all fields!";
     return;
   }
 
-  if(code !== "MoveMaster2026"){
-    msg.innerText="Incorrect Access Code!";
+  if (code !== "MoveMaster2026") {
+    msg.className = "msg-error";
+    msg.innerText = "❌ Incorrect Access Code!";
+    loginBtn.style.animation = "shake 0.4s ease";
+    setTimeout(() => loginBtn.style.animation = "", 400);
     return;
   }
 
-  // ✅ Proper unique ID generate
-  const driverId = "DRIVER_" + Date.now();
+  loginBtn.disabled = true;
+  btnContent.innerHTML = '<div class="spinner"></div> Verifying...';
+  msg.className = "msg-loading";
+  msg.innerText = "🔍 Checking driver details...";
 
-  localStorage.setItem("driverId", driverId);
-  localStorage.setItem("driverName", name);
+  try {
+    // ✅ FIXED: correct URL localhost:5000 + correct route /api/driver/by-name/
+    const res = await fetch(`${BASE_URL}/api/driver/by-name/${encodeURIComponent(name)}`);
 
-  window.location.href = "driverdashboard.html";
+    if (res.status === 404) {
+      msg.className = "msg-error";
+      msg.innerText = "❌ Driver not found. Ask owner to register you first.";
+      loginBtn.disabled = false;
+      btnContent.innerHTML = "🚀 Login to Dashboard";
+      return;
+    }
+    if (!res.ok) throw new Error("Server error " + res.status);
+
+    const driver = await res.json();
+
+    localStorage.setItem("driverId", driver._id);
+    localStorage.setItem("driverName", driver.name);
+    localStorage.setItem("driverContact", driver.contact || "");
+
+    msg.className = "msg-success";
+    msg.innerText = "✅ Welcome " + driver.name + "! Redirecting...";
+    btnContent.innerHTML = "✅ Logged In!";
+
+    setTimeout(() => { window.location.href = "driverdashboard.html"; }, 1200);
+
+  } catch (err) {
+    console.error(err);
+    msg.className = "msg-error";
+    msg.innerText = "❌ Cannot connect to server. Is backend running on localhost:5000?";
+    loginBtn.disabled = false;
+    btnContent.innerHTML = "🚀 Login to Dashboard";
+  }
 }
 </script>
-
 </body>
 </html>

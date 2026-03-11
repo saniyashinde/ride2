@@ -7,7 +7,7 @@ function login() {
     return;
   }
 
-  fetch("https://ride2-6.onrender.com/api/auth/login", {
+  fetch("http://localhost:5000/api/auth/login", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   credentials: "include",   // 🔥 MUST

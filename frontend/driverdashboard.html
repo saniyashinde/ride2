@@ -2,329 +2,631 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>MoveMaster Driver Dashboard</title>
-
-<!-- Leaflet CSS -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Driver Dashboard | MoveMaster</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"/>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
-
 <style>
-body {
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:linear-gradient(135deg,#42d1f5,#0aa2e6);
-    color:#fff;
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap');
+:root {
+  --primary: #0aa2e6; --primary-d: #0077b6; --primary-lt: #e8f6fd;
+  --green: #16a34a;   --green-lt: #dcfce7;
+  --orange: #ea580c;  --orange-lt: #fff7ed;
+  --red: #dc2626;     --red-lt: #fef2f2;
+  --purple: #7c3aed;  --purple-lt: #f5f3ff;
+  --bg: #f0f6fb;
+  --card: #ffffff;
+  --border: #dbeafe;
+  --text: #1e3a5f;
+  --muted: #64748b;
+  --header-bg: #0d1b2a;
 }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Baloo 2', cursive; }
+body { background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ===== HEADER ===== */
 header {
-    background:#088ac7;
-    padding:20px;
-    text-align:center;
+  background: linear-gradient(135deg, #0d1b2a, #1a3a5c, #0a4e7a);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 4px 20px rgba(10,162,230,0.2);
 }
-.container {
-    display:flex;
-    flex-wrap:wrap;
-    gap:20px;
-    padding:20px;
+.header-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px;
 }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo-icon { font-size: 34px; animation: rock 3s ease-in-out infinite; display: inline-block; }
+@keyframes rock { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg) translateY(-4px)} }
+.header-title h1 { font-size: 20px; font-weight: 800; color: #fff; }
+.header-title p  { font-size: 12px; color: rgba(255,255,255,0.5); }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.driver-chip {
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 30px; padding: 7px 18px;
+  font-size: 14px; font-weight: 600; color: #fff;
+}
+.status-badge {
+  padding: 7px 16px; border-radius: 30px;
+  font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; gap: 6px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  transition: all 0.3s;
+}
+.status-badge.idle     { background: rgba(255,255,255,0.12); color: #94a3b8; border: 1px solid rgba(255,255,255,0.15); }
+.status-badge.accepted { background: rgba(234,88,12,0.25);   color: #fb923c; border: 1px solid rgba(234,88,12,0.4); }
+.status-badge.started  { background: rgba(22,163,74,0.25);   color: #4ade80; border: 1px solid rgba(22,163,74,0.4); }
+.pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ===== STAT STRIP ===== */
+.stat-strip {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.stat-item {
+  padding: 11px 16px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.2s; cursor: default;
+}
+.stat-item:last-child { border-right: none; }
+.stat-item:hover { background: rgba(255,255,255,0.05); }
+.s-val { font-size: 22px; font-weight: 800; color: #fff; }
+.s-lab { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+.stat-item.g .s-val { color: #4ade80; }
+.stat-item.b .s-val { color: #60a5fa; }
+.stat-item.o .s-val { color: #fb923c; }
+.stat-item.p .s-val { color: #c084fc; }
+
+/* ===== LAYOUT ===== */
+.grid {
+  display: grid; grid-template-columns: 380px 1fr;
+  gap: 16px; padding: 16px;
+}
+.col-left  { display: flex; flex-direction: column; gap: 14px; }
+.col-right { display: flex; flex-direction: column; gap: 14px; }
+
+/* ===== CARD ===== */
 .card {
-    background:#fff;
-    color:#333;
-    border-radius:12px;
-    padding:20px;
-    flex:1 1 320px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px; padding: 18px;
+  box-shadow: 0 2px 12px rgba(10,162,230,0.07);
+  animation: fadeUp 0.35s ease both;
 }
-button {
-    background:#0aa2e6;
-    border:none;
-    color:#fff;
-    padding:8px 14px;
-    border-radius:6px;
-    cursor:pointer;
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.card-title {
+  font-size: 13px; font-weight: 800; color: var(--primary);
+  margin-bottom: 14px; padding-bottom: 10px;
+  border-bottom: 1.5px solid var(--primary-lt);
+  display: flex; align-items: center; gap: 6px;
+  text-transform: uppercase; letter-spacing: 0.6px;
 }
-button:hover {
-    transform:scale(1.05);
+
+/* ===== PENDING RIDES ===== */
+.ride-card {
+  background: #f8fbff;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 14px; padding: 13px;
+  margin-bottom: 10px; transition: all 0.2s;
 }
-#map {
-    height:320px;
-    border-radius:10px;
+.ride-card:hover { border-color: var(--primary); box-shadow: 0 3px 12px rgba(10,162,230,0.12); transform: translateY(-1px); }
+.ride-route {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 700; color: var(--text);
+  margin-bottom: 8px; flex-wrap: wrap;
 }
-.rideRequestDiv {
-    background:#f4f4f4;
-    padding:12px;
-    border-radius:8px;
-    margin-bottom:10px;
+.rarrow { color: var(--primary); }
+.chips  { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.chip {
+  background: #f1f5f9; border: 1px solid #e2e8f0;
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 11px; color: var(--muted);
 }
-#otpBox {
-    display:none;
-    margin-top:15px;
-    background:#eef6ff;
-    padding:12px;
-    border-radius:8px;
+.chip.fare   { background: var(--orange-lt); border-color: #fed7aa; color: var(--orange); font-weight: 700; }
+.chip.user   { background: var(--green-lt);  border-color: #bbf7d0; color: var(--green); }
+.btn-accept {
+  width: 100%; padding: 11px;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff; border: none; border-radius: 11px;
+  font-size: 14px; font-weight: 700; font-family: 'Baloo 2', cursive;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 3px 12px rgba(22,163,74,0.2);
 }
-input {
-    width:100%;
-    padding:8px;
-    margin-bottom:5px;
+.btn-accept:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(22,163,74,0.3); }
+
+/* ===== RIDE INFO BOX ===== */
+.ride-info-box {
+  background: var(--primary-lt);
+  border: 1.5px solid #bae6fd;
+  border-radius: 12px; padding: 12px;
+  margin-bottom: 14px; display: none;
 }
-.status {
-    padding:4px 12px;
-    border-radius:20px;
-    font-size:13px;
+.ri-row {
+  display: flex; justify-content: space-between;
+  padding: 5px 0; border-bottom: 1px solid #dbeafe;
+  font-size: 13px;
 }
+.ri-row:last-child { border-bottom: none; }
+.ri-label { color: var(--muted); }
+.ri-val   { color: var(--text); font-weight: 700; text-align: right; max-width: 60%; word-break: break-word; }
+
+/* ===== OTP BOX ===== */
+.otp-hint-box {
+  background: var(--orange-lt);
+  border: 1.5px dashed #fb923c;
+  border-radius: 12px; padding: 12px;
+  text-align: center; margin-bottom: 12px; display: none;
+}
+.otp-hint-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 2px; }
+.otp-digits { font-size: 42px; font-weight: 800; color: var(--orange); letter-spacing: 12px; }
+
+.otp-row { display: flex; gap: 8px; }
+#otpInput {
+  flex: 1; padding: 12px 14px;
+  background: #f8fbff; border: 2px solid #bfdbfe;
+  border-radius: 12px; font-size: 26px; font-weight: 800;
+  text-align: center; letter-spacing: 10px;
+  font-family: 'Baloo 2', cursive; color: var(--text);
+  transition: all 0.2s; outline: none;
+}
+#otpInput:focus { border-color: var(--primary); background: var(--primary-lt); box-shadow: 0 0 0 3px rgba(10,162,230,0.1); }
+.btn-verify {
+  padding: 12px 16px;
+  background: var(--primary); color: #fff;
+  border: none; border-radius: 11px;
+  font-size: 13px; font-weight: 700; font-family: 'Baloo 2', cursive;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.btn-verify:hover { background: var(--primary-d); }
+#otpMsg { margin-top: 8px; font-size: 14px; font-weight: 600; min-height: 20px; }
+
+/* ===== PAY BUTTONS ===== */
+.pay-row { display: flex; gap: 10px; }
+.btn-pay {
+  flex: 1; padding: 13px; border: none; border-radius: 12px;
+  font-size: 15px; font-weight: 700; font-family: 'Baloo 2', cursive;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-cash { background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; box-shadow: 0 3px 12px rgba(22,163,74,0.25); }
+.btn-upi  { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; box-shadow: 0 3px 12px rgba(124,58,237,0.25); }
+.btn-pay:hover { transform: translateY(-1px); }
+
+/* ===== SUCCESS BANNER ===== */
+.success-banner {
+  display: none;
+  background: var(--green-lt); border: 1.5px solid #86efac;
+  border-radius: 12px; padding: 14px 16px;
+  text-align: center; font-size: 15px; font-weight: 700; color: var(--green);
+  margin-bottom: 10px; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+
+/* ===== MAP ===== */
+#map { height: 420px; border-radius: 12px; z-index: 1; }
+
+/* ===== TODAY RIDES ===== */
+.today-ride-item {
+  background: #f8fbff; border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
+}
+.tr-route { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.tr-meta  { font-size: 12px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+.tr-cash  { color: var(--green); font-weight: 700; }
+.tr-upi   { color: var(--purple); font-weight: 700; }
+
+/* ===== EMPTY ===== */
+.empty { text-align: center; padding: 22px; color: var(--muted); font-size: 14px; }
+.empty .ei { font-size: 34px; display: block; margin-bottom: 6px; opacity: 0.5; }
+#noRideMsg { text-align: center; padding: 18px; color: var(--muted); font-size: 14px; }
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:800px) { .grid{grid-template-columns:1fr} .stat-strip{grid-template-columns:repeat(2,1fr)} }
 </style>
 </head>
-
 <body>
 
 <header>
-    <h1>🛺 MoveMaster Driver Dashboard🛺</h1>
-    <p>Welcome, <b id="driverNameDisplay"></b></p>
+  <div class="header-top">
+    <div class="header-left">
+      <span class="logo-icon">🛺</span>
+      <div class="header-title">
+        <h1>MoveMaster Driver</h1>
+        <p>Real-time ride management</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="driver-chip">👤 <span id="driverNameDisplay">Driver</span></div>
+      <div class="status-badge idle" id="statusBadge">
+        <span class="pulse-dot"></span>
+        <span id="statusText">IDLE</span>
+      </div>
+    </div>
+  </div>
+  <div class="stat-strip">
+    <div class="stat-item g"><div class="s-val" id="statTotal">0</div><div class="s-lab">Total Rides</div></div>
+    <div class="stat-item b"><div class="s-val" id="statToday">0</div><div class="s-lab">Today</div></div>
+    <div class="stat-item o"><div class="s-val" id="statEarnings">₹0</div><div class="s-lab">Today Earnings</div></div>
+    <div class="stat-item p"><div class="s-val" id="statPending">0</div><div class="s-lab">Pending</div></div>
+  </div>
 </header>
 
-<div class="container">
+<div class="grid">
+  <div class="col-left">
 
-    <div class="card">
-        <h3>Driver Profile</h3>
-        <p>Total Rides: <b id="totalRides">0</b></p>
-        <p>Ride Status:
-            <span id="rideStatus" class="status" style="background:#ccc">IDLE</span>
-        </p>
+    <!-- PENDING RIDES -->
+    <div class="card" style="animation-delay:0.05s">
+      <div class="card-title">🛺 Pending Ride Requests</div>
+      <div id="rideRequests"><div class="empty"><span class="ei">🔍</span>Checking for rides...</div></div>
     </div>
 
-    <div class="card">
-        <h3>🛺Pending Ride Requests🛺</h3>
-        <div id="rideRequests">Loading...</div>
-    </div>
-
-    
-
-    <div class="card">
-        <h3>Current Ride / OTP</h3>
-        <div id="otpBox">
-            <h4>🔐 Pickup OTP Verification</h4>
-            <input id="otpInput" placeholder="Enter User OTP">
-            <p id="otpMsg"></p>
-            <button onclick="verifyOTP()">Verify OTP</button>
+    <!-- OTP CARD -->
+    <div class="card" style="animation-delay:0.1s">
+      <div class="card-title">🔐 OTP Verification</div>
+      <div class="ride-info-box" id="rideInfoBox">
+        <div class="ri-row"><span class="ri-label">📍 Pickup</span><span class="ri-val" id="crPickup">—</span></div>
+        <div class="ri-row"><span class="ri-label">🏁 Drop</span><span class="ri-val" id="crDrop">—</span></div>
+        <div class="ri-row"><span class="ri-label">💰 Fare</span><span class="ri-val" id="crFare">—</span></div>
+      </div>
+      <div id="otpSection" style="display:none">
+        <div class="otp-hint-box" id="otpHintBox">
+          <div class="otp-hint-label">Passenger OTP (Demo)</div>
+          <div class="otp-digits" id="otpHintDigits">----</div>
         </div>
+        <div class="otp-row">
+          <input type="text" id="otpInput" placeholder="• • • •" maxlength="4"
+                 oninput="this.value=this.value.replace(/\D/g,'')"
+                 onkeydown="if(event.key==='Enter') verifyOTP()"/>
+          <button class="btn-verify" onclick="verifyOTP()">✅ Verify</button>
+        </div>
+        <p id="otpMsg"></p>
+      </div>
+      <p id="noRideMsg">Accept a ride to see OTP verification.</p>
     </div>
 
-    <div class="card" style="flex-basis:100%">
-        <h3>Ride Map</h3>
-        <div id="map"></div>
+    <!-- COMPLETE RIDE -->
+    <div class="card" style="animation-delay:0.15s">
+      <div class="card-title">✅ Complete Ride</div>
+      <!-- ✅ SUCCESS BANNER — shown after payment -->
+      <div class="success-banner" id="successBanner">🎉 Ride Completed Successfully!</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">Select payment after dropping passenger:</p>
+      <div class="pay-row">
+        <button class="btn-pay btn-cash" onclick="completeRide('CASH')">💵 Cash</button>
+        <button class="btn-pay btn-upi"  onclick="completeRide('UPI')">📱 UPI</button>
+      </div>
     </div>
 
-    <div class="card">
-        <h3>Complete Ride</h3>
-        <button onclick="completeRide('CASH')">Cash</button>
-        <button onclick="completeRide('UPI')">UPI</button>
+    <!-- TODAY RIDES -->
+    <div class="card" style="animation-delay:0.2s">
+      <div class="card-title">📊 Today's Completed Rides</div>
+      <div id="todayRideList"><div class="empty"><span class="ei">📋</span>No rides completed today yet.</div></div>
     </div>
 
+  </div>
+
+  <div class="col-right">
+    <div class="card" style="animation-delay:0.1s">
+      <div class="card-title">🗺️ Live Ride Map</div>
+      <div id="map"></div>
+    </div>
+  </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
 <script>
-// ===============================
-// DRIVER LOGIN CHECK
-// ===============================
-const driverId = localStorage.getItem("driverId");
-const driverName = localStorage.getItem("driverName");
-
-if (!driverId) {
-  alert("Please login first");
-  window.location.href = "driverlogin.html";
+// ─── HELPERS ────────────────────────────────────────────
+function safeGet(key) {
+  try {
+    const v = localStorage.getItem(key);
+    if (!v || v === "undefined" || v === "null") return null;
+    return JSON.parse(v);
+  } catch(e) { return null; }
 }
 
+// ─── AUTH ────────────────────────────────────────────────
+const driverId   = localStorage.getItem("driverId");
+const driverName = localStorage.getItem("driverName");
+if (!driverId) { alert("Please login first!"); window.location.href = "driverlogin.html"; }
 document.getElementById("driverNameDisplay").innerText = driverName || "Driver";
 
-// ===============================
-// CURRENT RIDE TRACKER
-// ===============================
-let currentRide = JSON.parse(localStorage.getItem("currentRide")) || null;
+// ─── STATUS ──────────────────────────────────────────────
+function setStatus(s) {
+  document.getElementById("statusBadge").className = "status-badge " + s;
+  document.getElementById("statusText").innerText   = s.toUpperCase();
+}
 
-// ===============================
-// FETCH PENDING RIDES
-// ===============================
-// ===============================
-// FETCH ONLY LAST ADDED PENDING RIDE
-// ===============================
-async function fetchPendingRides() {
+// ─── STATS ───────────────────────────────────────────────
+function updateStats() {
+  const all      = safeGet("driverRides_" + driverId) || [];
+  const today    = new Date().toDateString();
+  const todayArr = all.filter(r => new Date(r.time).toDateString() === today);
+  const earn     = todayArr.reduce((s,r) => s + (parseFloat(r.fare)||0), 0);
+  document.getElementById("statTotal").innerText    = all.length;
+  document.getElementById("statToday").innerText    = todayArr.length;
+  document.getElementById("statEarnings").innerText = "₹" + earn.toFixed(0);
+}
+
+// ─── MAP ─────────────────────────────────────────────────
+let map, routingControl, pickupMarker, dropMarker;
+function initMap() {
+  if (map) return;
+  map = L.map("map").setView([19.076, 72.8777], 12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    { attribution:"© OpenStreetMap contributors" }).addTo(map);
+}
+async function geocode(addr) {
   try {
-    const res = await fetch(`https://ride2-6.onrender.com/api/rides/pending`);
-    const rides = await res.json();
-    const container = document.getElementById("rideRequests");
-    container.innerHTML = "";
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr)}&limit=1`);
+    const d = await r.json();
+    if (d && d.length) return { lat: parseFloat(d[0].lat), lng: parseFloat(d[0].lon) };
+  } catch(e) {}
+  return null;
+}
+async function showRideOnMap(pickup, drop) {
+  if (!pickup||!drop||!map) return;
+  if (routingControl) { try{map.removeControl(routingControl);}catch(e){} routingControl=null; }
+  if (pickupMarker)   { try{map.removeLayer(pickupMarker);}catch(e){} }
+  if (dropMarker)     { try{map.removeLayer(dropMarker);}catch(e){} }
+  const p = await geocode(pickup);
+  const d = await geocode(drop);
+  if (!p||!d) return;
+  pickupMarker = L.marker([p.lat,p.lng],{icon:L.divIcon({className:"",html:`<div style="background:#16a34a;color:#fff;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,0.2);white-space:nowrap;border:2px solid #15803d">📍 ${pickup.split(",")[0]}</div>`,iconAnchor:[0,10]})}).addTo(map).bindPopup("📍 Pickup: "+pickup);
+  dropMarker   = L.marker([d.lat,d.lng], {icon:L.divIcon({className:"",html:`<div style="background:#dc2626;color:#fff;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,0.2);white-space:nowrap;border:2px solid #b91c1c">🏁 ${drop.split(",")[0]}</div>`,iconAnchor:[0,10]})}).addTo(map).bindPopup("🏁 Drop: "+drop);
+  try {
+    routingControl = L.Routing.control({
+      waypoints:[L.latLng(p.lat,p.lng),L.latLng(d.lat,d.lng)],
+      routeWhileDragging:false, show:false, addWaypoints:false,
+      lineOptions:{styles:[{color:"#0aa2e6",weight:5,opacity:0.75}]},
+      createMarker:()=>null
+    }).addTo(map);
+  } catch(e){}
+  map.fitBounds([[p.lat,p.lng],[d.lat,d.lng]],{padding:[50,50]});
+}
 
-    if (!rides.length) {
-      container.innerHTML = "No new ride requests 🚫";
+// ─── FETCH PENDING ────────────────────────────────────────
+let activeRideId = null; // ✅ track accepted ride id to hide from list
+
+async function fetchPendingRides() {
+  const box = document.getElementById("rideRequests");
+  try {
+    const res   = await fetch("http://localhost:5000/api/rides/pending");
+    const rides = await res.json();
+
+    // ✅ Filter out the currently accepted ride
+    const filtered = rides.filter(r => r._id !== activeRideId);
+
+    document.getElementById("statPending").innerText = filtered.length || 0;
+
+    if (!filtered.length) {
+      // If driver has active ride, show that message; else no rides
+      if (activeRideId) {
+        box.innerHTML = '<div class="empty"><span class="ei">✅</span>Ride accepted! Head to pickup.</div>';
+      } else {
+        box.innerHTML = '<div class="empty"><span class="ei">🚫</span>No new ride requests</div>';
+      }
       return;
     }
 
-    // Take only the last added ride
-    const ride = rides[rides.length - 1];
-
-    container.innerHTML = `
-      <div class="rideRequestDiv">
-        <p><b>User Email:</b> ${ride.userId?.name || "Unknown"}</p>
-        <p><b>Pickup:</b> ${ride.pickup}</p>
-        <p><b>Drop:</b> ${ride.drop}</p>
-        <p><b>Fare:</b> ₹${ride.fare}</p>
-        <button onclick="acceptRide('${ride._id}')">✅ Accept Ride</button>
-      </div>
-    `;
-
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = "Error fetching rides";
+    box.innerHTML = "";
+    filtered.slice(-3).reverse().forEach(ride => {
+      const uname = ride.userId?.name || ride.userId?.email || "Passenger";
+      box.innerHTML += `
+        <div class="ride-card">
+          <div class="ride-route">
+            <span>📍 ${ride.pickup||"—"}</span>
+            <span class="rarrow">→</span>
+            <span>🏁 ${ride.drop||"—"}</span>
+          </div>
+          <div class="chips">
+            <span class="chip user">👤 ${uname}</span>
+            <span class="chip fare">💰 ₹${ride.fare||"0"}</span>
+            <span class="chip">📏 ${ride.distance||"?"} km</span>
+          </div>
+          <button class="btn-accept"
+            onclick="acceptRide('${ride._id}','${(ride.pickup||'').replace(/'/g,"\\'")}','${(ride.drop||'').replace(/'/g,"\\'")}','${ride.fare||0}')">
+            ✅ Accept Ride
+          </button>
+        </div>`;
+    });
+  } catch(e) {
+    box.innerHTML = '<div class="empty"><span class="ei">⚠️</span>Cannot reach server. Check localhost:5000</div>';
   }
 }
 
-// ===============================
-// ACCEPT RIDE
-// ===============================
-async function acceptRide(rideId) {
+// ─── ACCEPT RIDE ─────────────────────────────────────────
+async function acceptRide(rideId, pickup, drop, fare) {
   try {
-    const res = await fetch("https://ride2-6.onrender.com/api/rides/accept-ride", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
+    const res  = await fetch("http://localhost:5000/api/rides/accept-ride", {
+      method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ rideId, driverId })
     });
-
     const data = await res.json();
-    currentRide = data.ride;
 
-    // Show OTP box
-    document.getElementById("otpBox").style.display = "block";
-    document.getElementById("rideStatus").innerText = "accepted";
-    document.getElementById("rideStatus").style.background = "orange";
+    const rideData = {
+      _id:    rideId,
+      pickup: pickup || data.ride?.pickup || "",
+      drop:   drop   || data.ride?.drop   || "",
+      fare:   fare   || data.ride?.fare   || "0",
+      otp:    data.ride?.otp || null,
+      status: "accepted", otpVerified: false
+    };
+    localStorage.setItem("currentRide", JSON.stringify(rideData));
 
-    // Update localStorage
-    localStorage.setItem("currentRide", JSON.stringify({...currentRide, status: "accepted"}));
+    // ✅ Set active ride id — this hides it from pending list
+    activeRideId = rideId;
 
-    fetchPendingRides();
-    fetchPreviousRides();
+    showRidePanel(rideData);
+    setStatus("accepted");
+    fetchPendingRides(); // refresh — will filter out this ride
+    showRideOnMap(rideData.pickup, rideData.drop);
 
-  } catch (err) {
-    console.error(err);
+  } catch(e) {
+    alert("❌ Error accepting ride. Is server running?");
+    console.error(e);
   }
 }
 
-// ===============================
-// VERIFY OTP
-// ===============================
+// ─── SHOW RIDE PANEL ─────────────────────────────────────
+function showRidePanel(ride) {
+  document.getElementById("noRideMsg").style.display    = "none";
+  document.getElementById("rideInfoBox").style.display  = "block";
+  document.getElementById("otpSection").style.display   = "block";
+  document.getElementById("crPickup").innerText = ride.pickup || "—";
+  document.getElementById("crDrop").innerText   = ride.drop   || "—";
+  document.getElementById("crFare").innerText   = "₹" + (ride.fare||"0");
+  if (ride.otp && !ride.otpVerified) {
+    document.getElementById("otpHintBox").style.display = "block";
+    document.getElementById("otpHintDigits").innerText  = ride.otp;
+  }
+}
+
+// ─── VERIFY OTP ──────────────────────────────────────────
 function verifyOTP() {
-  const enteredOtp = document.getElementById("otpInput").value.trim();
-  let currentRide = JSON.parse(localStorage.getItem("currentRide"));
+  const entered = document.getElementById("otpInput").value.trim();
+  const otpMsg  = document.getElementById("otpMsg");
+  const cur     = safeGet("currentRide");
+  if (!cur)       { otpMsg.style.color="#dc2626"; otpMsg.innerText="❌ No active ride."; return; }
+  if (!entered)   { otpMsg.style.color="#ea580c"; otpMsg.innerText="⚠️ Enter OTP."; return; }
+  if (!cur.otp)   { otpMsg.style.color="#dc2626"; otpMsg.innerText="❌ OTP not generated. Ask passenger."; return; }
 
-  if (!currentRide) {
-    document.getElementById("otpMsg").innerText = "❌ No ride selected. Please wait for driver to accept your ride.";
-    return;
-  }
-
-  if (!enteredOtp) {
-    document.getElementById("otpMsg").innerText = "❌ Please enter OTP.";
-    return;
-  }
-
-  if (!currentRide.otp) {
-    document.getElementById("otpMsg").innerText = "❌ OTP not set for this ride. Please contact support.";
-    return;
-  }
-
-  // Simple local check
-  if (enteredOtp === currentRide.otp) {
-    document.getElementById("otpMsg").innerText = "✅ OTP Verified. Ride started!";
-    document.getElementById("rideStatus").innerText = "started";
-    document.getElementById("rideStatus").style.background = "green";
-    document.getElementById("otpBox").style.display = "none";
-
-    currentRide.status = "started";
-    currentRide.otpVerified = true;
-    localStorage.setItem("currentRide", JSON.stringify(currentRide));
-
+  if (entered === String(cur.otp)) {
+    otpMsg.style.color = "#16a34a";
+    otpMsg.innerText   = "✅ OTP Verified! Ride Started 🎉";
+    cur.status = "started"; cur.otpVerified = true;
+    localStorage.setItem("currentRide", JSON.stringify(cur));
+    setStatus("started");
+    document.getElementById("otpInput").disabled = true;
+    document.getElementById("otpHintBox").style.display = "none";
   } else {
-    document.getElementById("otpMsg").innerText = "❌ OTP is incorrect. Please try again.";
+    otpMsg.style.color = "#dc2626";
+    otpMsg.innerText   = "❌ Wrong OTP! Try again.";
+    document.getElementById("otpInput").value = "";
+    document.getElementById("otpInput").style.borderColor = "#fca5a5";
+    setTimeout(()=>document.getElementById("otpInput").style.borderColor="", 1500);
+    document.getElementById("otpInput").focus();
   }
 }
 
-// ===============================
-// COMPLETE RIDE
-// ===============================
-// ===============================
-// COMPLETE RIDE (Local)
-// ===============================
+// ─── COMPLETE RIDE ───────────────────────────────────────
 async function completeRide(paymentMode) {
-  let currentRide = JSON.parse(localStorage.getItem("currentRide"));
-  if (!currentRide) return alert("❌ No ride active");
+  const cur = safeGet("currentRide");
+  if (!cur)               { alert("❌ No active ride!"); return; }
+  if (!cur.otpVerified)   { alert("⚠️ Verify passenger OTP first!"); return; }
 
+  // Save to persistent key
+  const all = safeGet("driverRides_" + driverId) || [];
+  all.push({ pickup:cur.pickup||"—", drop:cur.drop||"—", fare:cur.fare||"0", payment:paymentMode, time:new Date().toISOString() });
+  localStorage.setItem("driverRides_" + driverId, JSON.stringify(all));
+
+  // Backend
   try {
-    const res = await fetch("https://ride2-6.onrender.com/api/rides/complete-ride", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        rideId: currentRide._id,
-        driverId: driverId,
-        paymentMode
-      })
+    if (cur._id) await fetch("http://localhost:5000/api/rides/complete-ride",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({rideId:cur._id, driverId, paymentMode})
     });
+  } catch(e){}
 
-    const data = await res.json();
+  showConfetti();
 
-    if (res.ok) {
-      alert(`🎉 Ride Completed!\nPayment Mode: ${paymentMode}`);
+  // ✅ Show success banner instead of alert
+  const banner = document.getElementById("successBanner");
+  banner.innerHTML = `🎉 Ride Completed! &nbsp;💳 ${paymentMode} &nbsp;💰 ₹${cur.fare}`;
+  banner.style.display = "block";
+  setTimeout(()=>{ banner.style.display="none"; }, 4000);
 
-      // Remove current ride
-      localStorage.removeItem("currentRide");
+  localStorage.removeItem("currentRide");
 
-      // Update UI
-      document.getElementById("rideStatus").innerText = "IDLE";
-      document.getElementById("rideStatus").style.background = "#ccc";
+  // ✅ Clear activeRideId — pending list shows all rides again
+  activeRideId = null;
 
-      // Update driver total rides (optional)
-      let driverData = JSON.parse(localStorage.getItem("driverData")) || { totalRides: 0 };
-      driverData.totalRides += 1;
-      localStorage.setItem("driverData", JSON.stringify(driverData));
-      document.getElementById("totalRides").innerText = driverData.totalRides;
+  // Reset UI
+  setStatus("idle");
+  document.getElementById("noRideMsg").style.display    = "block";
+  document.getElementById("rideInfoBox").style.display  = "none";
+  document.getElementById("otpSection").style.display   = "none";
+  document.getElementById("otpInput").value             = "";
+  document.getElementById("otpInput").disabled          = false;
+  document.getElementById("otpMsg").innerText           = "";
 
-      fetchPendingRides();  // refresh pending rides
+  // Clear map
+  if (routingControl){try{map.removeControl(routingControl);}catch(e){} routingControl=null;}
+  if (pickupMarker)  {try{map.removeLayer(pickupMarker);}catch(e){}}
+  if (dropMarker)    {try{map.removeLayer(dropMarker);}catch(e){}}
+  map.setView([19.076, 72.8777], 12);
+
+  updateStats();
+  renderTodayRides();
+  fetchPendingRides(); // ✅ refresh shows fresh pending rides
+}
+
+// ─── RENDER TODAY RIDES ──────────────────────────────────
+function renderTodayRides() {
+  const all      = safeGet("driverRides_" + driverId) || [];
+  const today    = new Date().toDateString();
+  const todayArr = all.filter(r => new Date(r.time).toDateString() === today);
+  const list     = document.getElementById("todayRideList");
+  document.getElementById("statToday").innerText = todayArr.length;
+  if (!todayArr.length) {
+    list.innerHTML = '<div class="empty"><span class="ei">📋</span>No rides completed today yet.</div>';
+    return;
+  }
+  list.innerHTML = "";
+  todayArr.slice().reverse().forEach(r => {
+    const pc = r.payment==="CASH"?"tr-cash":"tr-upi";
+    list.innerHTML += `
+      <div class="today-ride-item">
+        <div class="tr-route">📍 ${r.pickup} → 🏁 ${r.drop}</div>
+        <div class="tr-meta">
+          <span>💰 ₹${r.fare}</span>
+          <span class="${pc}">💳 ${r.payment}</span>
+          <span>⏰ ${new Date(r.time).toLocaleTimeString()}</span>
+        </div>
+      </div>`;
+  });
+}
+
+// ─── CONFETTI ────────────────────────────────────────────
+function showConfetti() {
+  const cols=["#0aa2e6","#16a34a","#ea580c","#7c3aed","#dc2626","#fff"];
+  for(let i=0;i<35;i++){
+    const c=document.createElement("div");
+    c.style.cssText=`position:fixed;width:10px;height:10px;border-radius:${Math.random()>.5?'50%':'2px'};background:${cols[Math.floor(Math.random()*cols.length)]};left:${Math.random()*100}vw;top:-10px;animation:cffall ${1.2+Math.random()*1.5}s linear forwards;z-index:9999;pointer-events:none`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3000);
+  }
+  if(!document.getElementById("cfs")){
+    const s=document.createElement("style");
+    s.id="cfs";s.innerText="@keyframes cffall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}";
+    document.head.appendChild(s);
+  }
+}
+
+// ─── RESTORE ON REFRESH ──────────────────────────────────
+window.onload = function() {
+  initMap(); // ✅ map init only after Leaflet loaded
+  const saved = safeGet("currentRide");
+  if (saved && saved.status !== "completed") {
+    activeRideId = saved._id; // ✅ restore active ride id
+    showRidePanel(saved);
+    if (saved.otpVerified) {
+      setStatus("started");
+      document.getElementById("otpInput").disabled     = true;
+      document.getElementById("otpMsg").style.color    = "#16a34a";
+      document.getElementById("otpMsg").innerText      = "✅ OTP verified. Ride in progress.";
+      document.getElementById("otpHintBox").style.display = "none";
     } else {
-      alert("Error completing ride: " + data.message);
+      setStatus("accepted");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Server error while completing ride");
+    if (saved.pickup && saved.drop) showRideOnMap(saved.pickup, saved.drop);
   }
-}
-// ===============================
-// LEAFLET MAP INIT
-// ===============================
-const map = L.map("map").setView([19.0760, 72.8777], 12); // Mumbai default
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© OpenStreetMap contributors'
-}).addTo(map);
+  updateStats();
+  renderTodayRides();
+  fetchPendingRides();
+};
 
-async function loadDriverLocations() {
-  try {
-    const res = await fetch("https://ride2-6.onrender.com/api/drivers/locations");
-    const drivers = await res.json();
-
-    drivers.forEach(d => {
-      L.marker([d.lat, d.lng])
-        .addTo(map)
-        .bindPopup(`<b>${d.name}</b><br>Available: ${d.available}`);
-    });
-  } catch(err) {
-    console.error("Map error:", err);
-  }
-}
-
-// Fetch initial rides and map
-fetchPendingRides();
-fetchPreviousRides();
-loadDriverLocations();
+// Auto-refresh pending every 8s
+setInterval(fetchPendingRides, 8000);
 </script>
-
 </body>
 </html>

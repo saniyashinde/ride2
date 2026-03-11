@@ -1,4 +1,4 @@
-const socket = io("https://ride2-6.onrender.com");
+const socket = io("http://localhost:5000");
 
 const rideId = localStorage.getItem("rideId");
 if (!rideId) {
