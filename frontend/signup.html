@@ -22,37 +22,104 @@ body {
   background:#fff;
   padding:30px;
   border-radius:15px;
-  width:350px;
+  width:370px;
   text-align:center;
   box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
 h2 { color:#0aa2e6; margin-bottom:20px; }
 
+.input-wrap {
+  position: relative;
+  margin: 6px 0;
+}
+
 input {
   width:100%;
   padding:10px;
-  margin:6px 0;
   border-radius:6px;
   border:1px solid #ccc;
+  box-sizing: border-box;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+input:focus { outline: none; border-color: #0aa2e6; }
+input.input-ok { border-color: #22c55e; }
+input.input-err { border-color: #ef4444; }
+
+/* eye toggle for password */
+.eye-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  width: auto;
+  padding: 0;
+  margin: 0;
+  color: #888;
+}
+
+.field-msg {
+  font-size: 11px;
+  text-align: left;
+  margin: 1px 2px 4px 2px;
+  min-height: 14px;
+}
+.field-ok  { color: #16a34a; }
+.field-err { color: #dc2626; }
+
+/* password strength bar */
+.strength-bar {
+  height: 4px;
+  border-radius: 4px;
+  margin: 3px 0 4px 0;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+.strength-fill {
+  height: 100%;
+  border-radius: 4px;
+  width: 0%;
+  transition: width 0.3s, background 0.3s;
 }
 
 button {
   width:100%;
   padding:12px;
-  margin:10px 0;
+  margin:10px 0 0 0;
   border:none;
   border-radius:8px;
   font-size:16px;
   cursor:pointer;
 }
 
-.create-btn { background:#0aa2e6; color:#fff; }
-.continue-btn { background:#42d1f5; color:#fff; }
+.create-btn  { background:#0aa2e6; color:#fff; margin-bottom: 6px;}
+.continue-btn{ background:#42d1f5; color:#fff; }
+.submit-btn  { background:#0aa2e6; color:#fff; font-weight:bold; }
 
-.msg { font-size:14px; min-height:18px; margin-top:5px; }
+.msg { font-size:14px; min-height:18px; margin-top:8px; }
 .error { color:red; }
 .valid { color:green; }
+
+/* rules tooltip list */
+.rules {
+  font-size:11px;
+  text-align:left;
+  background:#f0f9ff;
+  border-radius:6px;
+  padding:6px 10px;
+  margin:2px 0 6px 0;
+  border:1px solid #bae6fd;
+  display:none;
+}
+.rules li { margin:2px 0; list-style:none; padding-left:4px; }
+.rules li.ok  { color:#16a34a; }
+.rules li.bad { color:#dc2626; }
 </style>
 </head>
 
@@ -61,191 +128,443 @@ button {
 <div class="box">
   <h2>MoveMaster</h2>
 
-  <button class="create-btn" onclick="showCreate()">➕ Create New Account</button>
+  <button class="create-btn"   onclick="showCreate()">➕ Create New Account</button>
   <button class="continue-btn" onclick="showContinue()">🔓 Already Have Account</button>
 
-  <!-- ✅ GOOGLE LOGIN -->
+  <!-- Google Login -->
   <div id="g_id_onload"
        data-client_id="943781661668-44q4u48pes40ma73g6vh8h27jpbg9jtk.apps.googleusercontent.com"
-       data-callback="onGoogleLoginSuccess">
+       data-callback="onGoogleLoginSuccess"
+       data-auto_prompt="false">
   </div>
 
-  <div class="g_id_signin"></div>
+  <div style="margin-top:12px; display:flex; justify-content:center;">
+    <div class="g_id_signin"
+         data-type="standard"
+         data-shape="rectangular"
+         data-theme="outline"
+         data-text="signin_with"
+         data-size="large"
+         data-logo_alignment="left"
+         data-width="310">
+    </div>
+  </div>
 
-  <div id="formArea" style="margin-top:20px;"></div>
+  <div style="display:flex; align-items:center; margin:12px 0 4px 0; gap:8px;">
+    <div style="flex:1; height:1px; background:#ddd;"></div>
+    <span style="font-size:12px; color:#aaa;">or</span>
+    <div style="flex:1; height:1px; background:#ddd;"></div>
+  </div>
+
+  <div id="formArea" style="margin-top:16px;"></div>
   <p id="msg" class="msg"></p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
-<!-- ====================== MODIFIED PARTS ONLY ====================== -->
 <script>
 const formArea = document.getElementById("formArea");
-const msg = document.getElementById("msg");
+const msg      = document.getElementById("msg");
 
-// Detect backend URL (local or deployed)
 const API_URL = location.hostname === "localhost"
   ? "http://localhost:5000/api/users"
   : "http://localhost:5000/api/users";
 
-/* ---------- CREATE ACCOUNT ---------- */
+/* ─────────────────────────────────────────
+   VALIDATION RULES
+───────────────────────────────────────── */
+// Gmail: must end with @gmail.com  (case-insensitive, no spaces)
+const GMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@gmail\.com$/i;
+
+// Password rules
+const PWD_RULES = {
+  length:   { test: v => v.length >= 8,           label: "At least 8 characters" },
+  upper:    { test: v => /[A-Z]/.test(v),          label: "At least 1 uppercase letter (A-Z)" },
+  number:   { test: v => /[0-9]/.test(v),          label: "At least 1 number (0-9)" },
+  special:  { test: v => /[^A-Za-z0-9]/.test(v),  label: "At least 1 special character (!@#$…)" },
+};
+
+function validateGmail(email) {
+  if (!email) return { ok: false, msg: "Email is required." };
+  if (!GMAIL_REGEX.test(email)) return { ok: false, msg: "Must be a valid @gmail.com address." };
+  return { ok: true, msg: "✓ Valid Gmail address" };
+}
+
+function validatePassword(pwd) {
+  const results = {};
+  let passCount = 0;
+  for (const [key, rule] of Object.entries(PWD_RULES)) {
+    results[key] = rule.test(pwd);
+    if (results[key]) passCount++;
+  }
+  return { results, passCount, total: Object.keys(PWD_RULES).length };
+}
+
+/* ─────────────────────────────────────────
+   HELPER: build a password field with
+   live strength bar + rules list
+───────────────────────────────────────── */
+function buildPasswordField(id, placeholder) {
+  // wrapper
+  const wrap = document.createElement("div");
+  wrap.className = "input-wrap";
+
+  const input = document.createElement("input");
+  input.id = id;
+  input.type = "password";
+  input.placeholder = placeholder;
+
+  // eye toggle
+  const eye = document.createElement("button");
+  eye.className = "eye-btn";
+  eye.type = "button";
+  eye.innerText = "👁";
+  eye.title = "Show/hide password";
+  eye.addEventListener("click", () => {
+    input.type = input.type === "password" ? "text" : "password";
+    eye.innerText = input.type === "password" ? "👁" : "🙈";
+  });
+
+  wrap.appendChild(input);
+  wrap.appendChild(eye);
+
+  // strength bar (only for create)
+  const bar  = document.createElement("div"); bar.className  = "strength-bar";
+  const fill = document.createElement("div"); fill.className = "strength-fill";
+  bar.appendChild(fill);
+
+  // rules list
+  const ruleBox = document.createElement("ul");
+  ruleBox.className = "rules";
+  const liMap = {};
+  for (const [key, rule] of Object.entries(PWD_RULES)) {
+    const li = document.createElement("li");
+    li.innerText = "✗ " + rule.label;
+    li.className = "bad";
+    ruleBox.appendChild(li);
+    liMap[key] = li;
+  }
+
+  // field-level message
+  const fm = document.createElement("div");
+  fm.className = "field-msg";
+
+  // live validation
+  input.addEventListener("focus", () => { ruleBox.style.display = "block"; });
+  input.addEventListener("input", () => {
+    const { results, passCount, total } = validatePassword(input.value);
+    // update rule items
+    for (const [key, passed] of Object.entries(results)) {
+      liMap[key].innerText = (passed ? "✓ " : "✗ ") + PWD_RULES[key].label;
+      liMap[key].className = passed ? "ok" : "bad";
+    }
+    // strength bar
+    const pct = (passCount / total) * 100;
+    fill.style.width = pct + "%";
+    fill.style.background =
+      passCount === 4 ? "#16a34a" :
+      passCount === 3 ? "#eab308" :
+      passCount === 2 ? "#f97316" : "#ef4444";
+
+    if (passCount === total) {
+      input.className = "input-ok";
+      fm.innerText = "✓ Strong password";
+      fm.className = "field-msg field-ok";
+    } else {
+      input.className = input.value ? "input-err" : "";
+      fm.innerText = "";
+    }
+  });
+  input.addEventListener("blur", () => {
+    const { passCount, total } = validatePassword(input.value);
+    if (input.value && passCount < total) {
+      fm.innerText = "⚠ Password does not meet all requirements.";
+      fm.className = "field-msg field-err";
+    }
+  });
+
+  return { wrap, bar, ruleBox, fm, input };
+}
+
+/* ─────────────────────────────────────────
+   HELPER: build an email field with
+   live Gmail validation
+───────────────────────────────────────── */
+function buildEmailField() {
+  const wrap = document.createElement("div");
+  wrap.className = "input-wrap";
+
+  const input = document.createElement("input");
+  input.id = "email";
+  input.type = "email";
+  input.placeholder = "Gmail address (abc@gmail.com)";
+
+  const fm = document.createElement("div");
+  fm.className = "field-msg";
+
+  input.addEventListener("input", () => {
+    const { ok, msg: vmsg } = validateGmail(input.value.trim());
+    if (input.value) {
+      input.className = ok ? "input-ok" : "input-err";
+      fm.innerText    = ok ? "✓ " + vmsg : "✗ " + vmsg;
+      fm.className    = "field-msg " + (ok ? "field-ok" : "field-err");
+    } else {
+      input.className = "";
+      fm.innerText    = "";
+    }
+  });
+  input.addEventListener("blur", () => {
+    const { ok, msg: vmsg } = validateGmail(input.value.trim());
+    if (input.value) {
+      input.className = ok ? "input-ok" : "input-err";
+      fm.innerText    = (ok ? "✓ " : "✗ ") + vmsg;
+      fm.className    = "field-msg " + (ok ? "field-ok" : "field-err");
+    }
+  });
+
+  wrap.appendChild(input);
+  return { wrap, fm, input };
+}
+
+/* ─────────────────────────────────────────
+   SHOW CREATE FORM
+───────────────────────────────────────── */
 function showCreate() {
   msg.innerText = "";
-
-  // Clear previous form
   formArea.innerHTML = "";
 
-  // Name input
+  // Name
+  const nameWrap = document.createElement("div");
+  nameWrap.className = "input-wrap";
   const nameInput = document.createElement("input");
   nameInput.id = "name";
   nameInput.placeholder = "Full Name";
+  nameWrap.appendChild(nameInput);
 
-  // Email input
-  const emailInput = document.createElement("input");
-  emailInput.id = "email";
-  emailInput.placeholder = "Gmail address";
+  // Email
+  const { wrap: emailWrap, fm: emailFm, input: emailInput } = buildEmailField();
 
-  // Password input
-  const passwordInput = document.createElement("input");
-  passwordInput.id = "password";
-  passwordInput.type = "password";
-  passwordInput.placeholder = "Password";
+  // Password
+  const { wrap: pwdWrap, bar, ruleBox, fm: pwdFm, input: pwdInput } =
+        buildPasswordField("password", "Password");
 
-  // Create account button
+  // Submit button
   const btn = document.createElement("button");
   btn.innerText = "Create Account";
+  btn.className = "submit-btn";
   btn.addEventListener("click", createAccount);
 
-  // Append all elements
-  formArea.appendChild(nameInput);
-  formArea.appendChild(emailInput);
-  formArea.appendChild(passwordInput);
+  formArea.appendChild(nameWrap);
+  formArea.appendChild(emailWrap);
+  formArea.appendChild(emailFm);
+  formArea.appendChild(pwdWrap);
+  formArea.appendChild(bar);
+  formArea.appendChild(ruleBox);
+  formArea.appendChild(pwdFm);
   formArea.appendChild(btn);
 }
 
+/* ─────────────────────────────────────────
+   SHOW LOGIN FORM
+───────────────────────────────────────── */
 function showContinue() {
   msg.innerText = "";
   formArea.innerHTML = "";
 
-  const emailInput = document.createElement("input");
-  emailInput.id = "email";
-  emailInput.placeholder = "Enter your email";
+  // Email
+  const { wrap: emailWrap, fm: emailFm, input: emailInput } = buildEmailField();
 
-  const passwordInput = document.createElement("input");
-  passwordInput.id = "password";
-  passwordInput.type = "password";
-  passwordInput.placeholder = "Password";
+  // Password (login – simpler, no strength bar)
+  const pwdWrap = document.createElement("div");
+  pwdWrap.className = "input-wrap";
+  const pwdInput = document.createElement("input");
+  pwdInput.id = "password";
+  pwdInput.type = "password";
+  pwdInput.placeholder = "Password";
+  const eye = document.createElement("button");
+  eye.className = "eye-btn";
+  eye.type = "button";
+  eye.innerText = "👁";
+  eye.addEventListener("click", () => {
+    pwdInput.type = pwdInput.type === "password" ? "text" : "password";
+    eye.innerText  = pwdInput.type === "password" ? "👁" : "🙈";
+  });
+  pwdWrap.appendChild(pwdInput);
+  pwdWrap.appendChild(eye);
 
   const btn = document.createElement("button");
   btn.innerText = "Continue";
+  btn.className = "submit-btn";
   btn.addEventListener("click", continueLogin);
 
-  formArea.appendChild(emailInput);
-  formArea.appendChild(passwordInput);
+  formArea.appendChild(emailWrap);
+  formArea.appendChild(emailFm);
+  formArea.appendChild(pwdWrap);
   formArea.appendChild(btn);
 }
-/* ---------- CREATE ACCOUNT ---------- */
+
+/* ─────────────────────────────────────────
+   CREATE ACCOUNT  (with all validations)
+───────────────────────────────────────── */
 async function createAccount(e) {
   if (e) e.preventDefault();
-  const name = document.getElementById("name").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  msg.innerText = "";
 
-  if (!name || !email || !password) {
-    msg.innerText = "❌ All fields are required";
+  const name     = (document.getElementById("name")?.value     || "").trim();
+  const email    = (document.getElementById("email")?.value    || "").trim();
+  const password = (document.getElementById("password")?.value || "").trim();
+
+  // ── 1. Name check
+  if (!name) {
+    msg.innerText = "❌ Full name is required.";
     msg.className = "msg error";
     return;
   }
 
+  // ── 2. Gmail validation
+  const emailCheck = validateGmail(email);
+  if (!emailCheck.ok) {
+    msg.innerText = "❌ " + emailCheck.msg;
+    msg.className = "msg error";
+    return;
+  }
+
+  // ── 3. Password validation
+  const { results, passCount, total } = validatePassword(password);
+  if (passCount < total) {
+    const failed = Object.entries(results)
+      .filter(([, ok]) => !ok)
+      .map(([key]) => PWD_RULES[key].label)
+      .join(", ");
+    msg.innerText = "❌ Password missing: " + failed;
+    msg.className = "msg error";
+    return;
+  }
+
+  // ── 4. Send to backend
   try {
-    const res = await fetch(`${API_URL}/signup`, {
+    const res  = await fetch(`${API_URL}/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ name, email, password })
     });
-
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem("userId", data.user._id);
+      localStorage.setItem("userId",        data.user._id);
       localStorage.setItem("loggedInEmail", data.user.email);
-      localStorage.setItem("userEmail", data.user.email);
-      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("userEmail",     data.user.email);
+      localStorage.setItem("loggedIn",      "true");
       msg.innerText = "✅ Account created successfully!";
       msg.className = "msg valid";
       setTimeout(() => window.location.href = "booking.html", 1000);
+
     } else {
-      msg.innerText = `❌ ${data.msg || "Error creating account"}`;
+      // ── 5. Duplicate account check (backend should return 409 or a flag)
+      if (res.status === 409 ||
+          (data.msg && data.msg.toLowerCase().includes("already"))) {
+        msg.innerText = "⚠️ An account with this Gmail already exists. Please login instead.";
+      } else {
+        msg.innerText = `❌ ${data.msg || "Error creating account"}`;
+      }
       msg.className = "msg error";
     }
+
   } catch (err) {
-    console.error("Signup Fetch error:", err);
+    console.error("Signup error:", err);
     msg.innerText = "❌ Network error (Server offline or CORS)";
     msg.className = "msg error";
   }
 }
 
-/* ---------- NORMAL LOGIN ---------- */
+/* ─────────────────────────────────────────
+   LOGIN  (with Gmail + password check)
+───────────────────────────────────────── */
 async function continueLogin(e) {
   if (e) e.preventDefault();
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  msg.innerText = "";
 
-  if (!email || !password) {
-    msg.innerText = "❌ Enter email and password";
+  const email    = (document.getElementById("email")?.value    || "").trim();
+  const password = (document.getElementById("password")?.value || "").trim();
+
+  // ── 1. Gmail format check
+  const emailCheck = validateGmail(email);
+  if (!emailCheck.ok) {
+    msg.innerText = "❌ " + emailCheck.msg;
     msg.className = "msg error";
     return;
   }
 
+  // ── 2. Password not empty + basic pattern check
+  if (!password) {
+    msg.innerText = "❌ Password is required.";
+    msg.className = "msg error";
+    return;
+  }
+  const { passCount, total } = validatePassword(password);
+  if (passCount < total) {
+    msg.innerText = "❌ Incorrect password format. Please check your password.";
+    msg.className = "msg error";
+    return;
+  }
+
+  // ── 3. Send to backend
   try {
-    const res = await fetch(`${API_URL}/login`, { // USE API_URL
+    const res  = await fetch(`${API_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ email, password })
     });
-
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem("userId", data.user._id);
+      localStorage.setItem("userId",        data.user._id);
       localStorage.setItem("loggedInEmail", data.user.email);
-      localStorage.setItem("userEmail", data.user.email);
-      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("userEmail",     data.user.email);
+      localStorage.setItem("loggedIn",      "true");
       msg.innerText = "✅ Login successful!";
       msg.className = "msg valid";
       setTimeout(() => window.location.href = "booking.html", 1000);
     } else {
-      msg.innerText = `❌ ${data.msg}`;
+      msg.innerText = `❌ ${data.msg || "Invalid email or password"}`;
       msg.className = "msg error";
     }
+
   } catch (err) {
-    console.error("Login Fetch error:", err);
+    console.error("Login error:", err);
     msg.innerText = "❌ Network error (Server offline or CORS)";
     msg.className = "msg error";
   }
 }
 
-/* ---------- GOOGLE LOGIN ---------- */
+/* ─────────────────────────────────────────
+   GOOGLE LOGIN
+───────────────────────────────────────── */
 function onGoogleLoginSuccess(response) {
   const data = jwt_decode(response.credential);
 
   const userData = {
-    name: data.name,
+    name:  data.name,
     email: data.email,
     image: data.picture
   };
 
-  localStorage.setItem("loggedInUser", JSON.stringify(userData));
+  localStorage.setItem("loggedInUser",  JSON.stringify(userData));
   localStorage.setItem("loggedInEmail", data.email);
 
-  // Send Google user to backend
-  fetch(`${API_URL}/signup`, { // USE API_URL
+  // Register/login Google user in backend
+  fetch(`${API_URL}/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ email: data.email, password: "google_oauth", name: data.name, image: data.picture })
-  }).catch(err => console.log("Google user already exists or error"));
+    body: JSON.stringify({
+      email:    data.email,
+      password: "google_oauth",
+      name:     data.name,
+      image:    data.picture
+    })
+  }).catch(err => console.log("Google user already exists or error:", err));
 
   window.location.href = "booking.html";
 }
